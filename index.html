@@ -250,15 +250,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
-
-<!-- example -->
-<div id="menu-placeholder"></div>
-
-<script>
-fetch('menu.html')
-  .then(response => response.text())
-  .then(data => {
-    document.getElementById('menu-placeholder').innerHTML = data;
-  });
-</script>

@@ -1,195 +1,253 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hendon Pub | MENU</title>
-  <style>
-    body { font-family: Arial, sans-serif; }
-    .flag { cursor: pointer; width: 32px; height: 20px; margin: 5px; }
-    .menu-section { margin-top: 20px; }
-    .menu-item { margin: 5px 0; }
-  </style>
+  <title>The Hendon Pub | Pub & Grill</title>
+  <meta name="description" content="The Hendon Pub - Pub modern me ushqim tradicional, pije premium dhe atmosfere unike." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1 id="menu-title">Hendon Pub - MENU</h1>
-  
-  <!-- Zgjedhja e gjuhës -->
-  <div>
-    <img src="https://flagcdn.com/w20/al.png" alt="Shqip" class="flag" onclick="setLanguage('sq')">
-    <img src="https://flagcdn.com/w20/us.png" alt="English" class="flag" onclick="setLanguage('en')">
+  <header class="site-header" id="top">
+    <div class="container nav-wrap">
+      <a href="#top" class="logo"><span id="brandName">The Hendon</span></a>
+      <button class="menu-toggle" aria-label="Hap menune">☰</button>
+      <nav class="nav-links">
+        <a href="#about">Rreth Nesh</a>
+        <a href="#menu">Menu</a>
+        <a href="#gallery">Galeri</a>
+        <a href="#contact">Kontakt</a>
+      </nav>
+      <div class="auth-actions">
+        <button class="btn btn-ghost btn-small" id="manageBtn" hidden>Manage</button>
+        <button class="btn btn-ghost btn-small" id="loginBtn">Login</button>
+        <button class="btn btn-ghost btn-small" id="logoutBtn" hidden>Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="heroSection">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <p class="kicker" id="heroKicker">Pub & Grill</p>
+      <h1 id="heroTitle">Shija e Nates ne Zemer te Qytetit</h1>
+      <p class="lead" id="heroLead">Atmosfere autentike, kuzhine tradicionale dhe kokteje te kuruara per cdo mbremje.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#menu">Shiko Menune</a>
+        <a class="btn btn-ghost" id="mapsLink" target="_blank" rel="noopener" href="#">Na Gjej ne Maps</a>
+      </div>
+    </div>
+  </section>
+
+  <main>
+    <section class="about section" id="about">
+      <div class="container about-grid reveal">
+        <div>
+          <p class="section-tag">Rreth Nesh</p>
+          <h2 id="aboutTitle">Pub me Stil Modern</h2>
+          <p id="aboutText"></p>
+        </div>
+        <div class="about-card">
+          <h3>Orari</h3>
+          <p id="hoursText"></p>
+          <h3>Adresa</h3>
+          <p id="addressText"></p>
+          <a class="text-link" id="addressLink" target="_blank" rel="noopener" href="#">Hap lokacionin</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="menu section" id="menu">
+      <div class="container reveal">
+        <p class="section-tag">Menu</p>
+        <h2 id="menuTitle">Te Preferuarat</h2>
+
+        <div class="filters">
+          <button class="filter-btn active" data-filter="all">Te Gjitha</button>
+          <button class="filter-btn" data-filter="food">Ushqim</button>
+          <button class="filter-btn" data-filter="drink">Pije</button>
+        </div>
+
+        <div class="menu-grid" id="menuGrid"></div>
+      </div>
+    </section>
+
+    <section class="gallery section" id="gallery">
+      <div class="container reveal">
+        <p class="section-tag">Galeri</p>
+        <h2>Atmosfera</h2>
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </div>
+    </section>
+
+    <section class="reviews section" id="reviewsSection">
+      <div class="container reveal">
+        <p class="section-tag">Vleresime</p>
+        <div class="reviews-top">
+          <h2>Cfare Thone Klientet</h2>
+          <a class="btn btn-ghost btn-small" id="allReviewsLink" target="_blank" rel="noopener" href="#">Shiko te gjitha ne Google</a>
+        </div>
+        <div class="reviews-grid" id="reviewsGrid"></div>
+      </div>
+    </section>
+
+    <section class="contact section" id="contact">
+      <div class="container contact-grid reveal">
+        <div>
+          <p class="section-tag">Kontakt</p>
+          <h2 id="contactTitle">Rezervo Tavolinen Tende</h2>
+          <p id="contactText"></p>
+          <a class="btn btn-primary" id="phoneLink" href="tel:+355698757893">+355698757893</a>
+          <div class="social-links">
+            <a class="btn btn-ghost btn-small" id="instagramLink" target="_blank" rel="noopener" href="#">Instagram</a>
+            <a class="btn btn-ghost btn-small" id="youtubeLink" target="_blank" rel="noopener" href="#">YouTube</a>
+            <a class="btn btn-ghost btn-small" id="tiktokLink" target="_blank" rel="noopener" href="#">TikTok</a>
+          </div>
+        </div>
+        <iframe
+          id="mapEmbed"
+          title="Lokacioni ne harte"
+          src=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> <span id="footerName">The Hendon Pub</span>. Te gjitha te drejtat e rezervuara.</p>
+      <p class="small-note" id="sessionInfo"></p>
+    </div>
+  </footer>
+
+  <aside class="control-panel" id="controlPanel" hidden>
+    <div class="panel-header">
+      <h3>Paneli i Menaxhimit</h3>
+      <button id="panelClose" class="btn btn-ghost btn-small">Mbyll</button>
+    </div>
+
+    <section class="panel-block">
+      <h4>Menu Editor (admin + user)</h4>
+      <div id="menuEditor"></div>
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-small" id="saveMenuBtn">Ruaj Menune</button>
+        <button class="btn btn-ghost btn-small" id="addMenuItemBtn" hidden>Shto Artikull</button>
+      </div>
+    </section>
+
+    <section class="panel-block admin-only" id="generalEditorBlock" hidden>
+      <h4>General Editor (vetem admin)</h4>
+      <label>Emri i biznesit</label>
+      <input id="editBusinessName" type="text" />
+      <label>Hero kicker</label>
+      <input id="editHeroKicker" type="text" />
+      <label>Hero title</label>
+      <input id="editHeroTitle" type="text" />
+      <label>Hero text</label>
+      <textarea id="editHeroLead" rows="3"></textarea>
+      <label>About title</label>
+      <input id="editAboutTitle" type="text" />
+      <label>About text</label>
+      <textarea id="editAboutText" rows="3"></textarea>
+      <label>Menu title</label>
+      <input id="editMenuTitle" type="text" />
+      <label>Orari</label>
+      <input id="editHours" type="text" />
+      <label>Adresa</label>
+      <input id="editAddress" type="text" />
+      <label>Kontakt title</label>
+      <input id="editContactTitle" type="text" />
+      <label>Kontakt text</label>
+      <textarea id="editContactText" rows="3"></textarea>
+      <label>Telefon</label>
+      <input id="editPhone" type="text" />
+      <label>Link Google Maps</label>
+      <input id="editMapsUrl" type="url" />
+      <label>Map embed URL</label>
+      <input id="editMapEmbed" type="url" />
+      <label>Hero image URL</label>
+      <input id="editHeroImage" type="url" />
+      <button class="btn btn-primary btn-small" id="saveGeneralBtn">Ruaj General</button>
+    </section>
+
+    <section class="panel-block admin-only" id="galleryEditorBlock" hidden>
+      <h4>Gallery Editor (vetem admin)</h4>
+      <label>Import foto nga URL (nje per rresht)</label>
+      <textarea id="galleryUrlsBulk" rows="4" placeholder="https://...&#10;https://..."></textarea>
+      <div class="panel-actions">
+        <button class="btn btn-ghost btn-small" id="importGalleryUrlsBtn">Importo URL</button>
+      </div>
+      <label>Upload foto nga kompjuteri</label>
+      <input id="galleryFileInput" type="file" accept="image/*" multiple />
+      <div id="galleryEditor"></div>
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-small" id="saveGalleryBtn">Ruaj Galerine</button>
+        <button class="btn btn-ghost btn-small" id="addGalleryBtn">Shto Foto</button>
+      </div>
+    </section>
+
+    <section class="panel-block admin-only" id="reviewsEditorBlock" hidden>
+      <h4>Reviews Editor (vetem admin)</h4>
+      <div id="reviewsEditor"></div>
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-small" id="saveReviewsBtn">Ruaj Reviews</button>
+        <button class="btn btn-ghost btn-small" id="addReviewBtn">Shto Review</button>
+      </div>
+    </section>
+
+    <section class="panel-block admin-only" id="usersBlock" hidden>
+      <h4>Users (vetem admin)</h4>
+      <div id="usersList"></div>
+      <div class="user-add">
+        <input id="newUsername" type="text" placeholder="username" />
+        <input id="newPassword" type="password" placeholder="password" />
+        <select id="newRole">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+        </select>
+        <button class="btn btn-primary btn-small" id="addUserBtn">Shto User</button>
+      </div>
+    </section>
+
+    <section class="panel-block admin-only" id="passwordBlock" hidden>
+      <h4>Password Manager (vetem admin)</h4>
+      <label>Ndrysho password-in tend</label>
+      <div class="user-add password-grid">
+        <input id="selfNewPassword" type="password" placeholder="password i ri" />
+        <button class="btn btn-primary btn-small" id="changeSelfPasswordBtn">Ndrysho</button>
+      </div>
+      <label>Ndrysho password per user tjeter</label>
+      <div class="user-add password-grid">
+        <select id="passwordTargetUser"></select>
+        <input id="targetNewPassword" type="password" placeholder="password i ri" />
+        <button class="btn btn-primary btn-small" id="changeUserPasswordBtn">Ruaj</button>
+      </div>
+    </section>
+
+  </aside>
+
+  <div class="modal" id="loginModal" hidden>
+    <div class="modal-card">
+      <h3>Login</h3>
+      <label>Username</label>
+      <input id="loginUsername" type="text" />
+      <label>Password</label>
+      <input id="loginPassword" type="password" />
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-small" id="submitLoginBtn">Hyr</button>
+        <button class="btn btn-ghost btn-small" id="cancelLoginBtn">Anulo</button>
+      </div>
+      <p id="loginError" class="error-text"></p>
+    </div>
   </div>
-  
-  <div id="menu-container"></div>
 
-  <script>
-  (function () {
-    const LANGUAGES = {
-      sq: {
-        "COFFEE": "KAFE",
-        "FRESH DRINKS": "PIJE TE FRESKTA",
-        "APERITIV": "APERITIV",
-        "COCKTAILS": "COCKTAILS",
-        "MENGJESI": "MËNGJESI",
-        "MASDITE / SNACKS": "MËSDITË / SNACKS",
-        "SPECIALS / TO EAT": "SPECIALS / TO EAT",
-        "LEGJENDA E FORCES": "LEGJENDA E FORCËS",
-        "COCKTAILS TE SUGJERUARA": "COCKTAILS TË SUGJERUARA",
-        "SHOTS & SHOOTERS": "SHOTS & SHOOTERS",
-        "Ask waiter": "Pyet kamarierin"
-      },
-      en: {
-        "COFFEE": "COFFEE",
-        "FRESH DRINKS": "FRESH DRINKS",
-        "APERITIV": "APERITIF",
-        "COCKTAILS": "COCKTAILS",
-        "MENGJESI": "BREAKFAST",
-        "MASDITE / SNACKS": "AFTERNOON / SNACKS",
-        "SPECIALS / TO EAT": "SPECIALS / TO EAT",
-        "LEGJENDA E FORCES": "LEGEND OF STRENGTH",
-        "COCKTAILS TE SUGJERUARA": "RECOMMENDED COCKTAILS",
-        "SHOTS & SHOOTERS": "SHOTS & SHOOTERS",
-        "Pyet kamarierin": "Ask waiter"
-      }
-    };
-
-    let currentLang = 'sq';
-
-    function buildHendonMenu() {
-      const items = [];
-      const add = (type, section, name, price) => {
-        items.push({ id: `m${items.length + 1}`, type, section, name, price });
-      };
-
-      // --- Drinks COFFEE ---
-      add("drink", "COFFEE", "Kafe", "120 ALL");
-      add("drink", "COFFEE", "Kafe e ftohte", "150 ALL");
-      add("drink", "COFFEE", "Makiato", "130 ALL");
-      add("drink", "COFFEE", "Makiato e ftohte", "150 ALL");
-      add("drink", "COFFEE", "Cappuccino", "180 ALL");
-      add("drink", "COFFEE", "Cappuccino (bustine)", "180 ALL");
-      add("drink", "COFFEE", "Cappuccino e ftohte", "250 ALL");
-      add("drink", "COFFEE", "Cokollate e ngrohte", "200 ALL");
-      add("drink", "COFFEE", "Cokollate e ftohte", "250 ALL");
-      add("drink", "COFFEE", "Kakao e ngrohte", "200 ALL");
-      add("drink", "COFFEE", "Kakao e ftohte", "250 ALL");
-      add("drink", "COFFEE", "Salep", "150 ALL");
-      add("drink", "COFFEE", "Caj (bustine)", "120 ALL");
-      add("drink", "COFFEE", "Caj bio", "250 ALL");
-      add("drink", "COFFEE", "Frape", "250 ALL");
-
-      // --- Fresh Drinks ---
-      add("drink", "FRESH DRINKS", "Uje Lajthiza", "100 ALL");
-      add("drink", "FRESH DRINKS", "Uje pa gaz (M250)", "150 ALL");
-      add("drink", "FRESH DRINKS", "Uje me gaz (M250)", "150 ALL");
-      add("drink", "FRESH DRINKS", "Coca Cola", "200 ALL");
-      add("drink", "FRESH DRINKS", "Lemon Soda", "200 ALL");
-      add("drink", "FRESH DRINKS", "Oran Soda", "200 ALL");
-      add("drink", "FRESH DRINKS", "Ice Tea pjeshke", "200 ALL");
-      add("drink", "FRESH DRINKS", "Ice Tea limon", "200 ALL");
-      add("drink", "FRESH DRINKS", "Red Bull", "400 ALL");
-      add("drink", "FRESH DRINKS", "Rose Lemonade", "400 ALL");
-      add("drink", "FRESH DRINKS", "Britvic", "200 ALL");
-      add("drink", "FRESH DRINKS", "Tonic Fentimans", "400 ALL");
-      add("drink", "FRESH DRINKS", "Grodino", "200 ALL");
-      add("drink", "FRESH DRINKS", "Bitter", "180 ALL");
-
-      // --- Aperitiv ---
-      add("drink", "APERITIV", "Aperol Spritz", "500 ALL");
-      add("drink", "APERITIV", "Campari Spritz", "500 ALL");
-      add("drink", "APERITIV", "Hugo", "500 ALL");
-
-      // --- Cocktails ---
-      add("drink", "COCKTAILS", "Vesper", "700 ALL");
-      add("drink", "COCKTAILS", "London Mule", "700 ALL");
-      add("drink", "COCKTAILS", "Negroni", "700 ALL");
-      add("drink", "COCKTAILS", "Gimlet", "700 ALL");
-      add("drink", "COCKTAILS", "Espresso Martini", "700 ALL");
-      add("drink", "COCKTAILS", "Bramble", "700 ALL");
-      add("drink", "COCKTAILS", "Churchill", "700 ALL");
-      add("drink", "COCKTAILS", "House Cocktail", "800 ALL");
-      add("drink", "COCKTAILS", "Analcolik", "600 ALL");
-      add("drink", "COCKTAILS", "Bartender Recipe", "800 / 900 / 1000 ALL");
-
-      // --- Food Breakfast ---
-      add("food", "MENGJESI", "Classic Benedict", "500 ALL");
-      add("food", "MENGJESI", "Omlete normale", "250 ALL");
-      add("food", "MENGJESI", "Egg Poached", "300 ALL");
-      add("food", "MENGJESI", "Sunny Side Up", "250 ALL");
-      add("food", "MENGJESI", "Ham & Cheese Sandwich", "150 ALL");
-      add("food", "MENGJESI", "Ham, Egg & Cheese Sandwich", "170 ALL");
-      add("food", "MENGJESI", "Hash Browns", "150 ALL");
-      add("food", "MENGJESI", "French Toast", "300 ALL");
-      add("food", "MENGJESI", "Petulla", "200 ALL");
-
-      // --- Snacks ---
-      add("food", "MASDITE / SNACKS", "Mini Burger", "450 ALL");
-      add("food", "MASDITE / SNACKS", "Chicken Wings", "700 ALL");
-      add("food", "MASDITE / SNACKS", "Chicken Fingers", "650 ALL");
-      add("food", "MASDITE / SNACKS", "Onion Rings", "350 ALL");
-      add("food", "MASDITE / SNACKS", "Kroketa", "350 ALL");
-      add("food", "MASDITE / SNACKS", "Patate fritel", "300 ALL");
-
-      // --- Specials ---
-      add("food", "SPECIALS / TO EAT", "Antipast e ngrohte", "1200 - 2200 ALL");
-      add("food", "SPECIALS / TO EAT", "Bruskete ancuge", "600 ALL");
-      add("food", "SPECIALS / TO EAT", "Bruskete klasike", "400 ALL");
-      add("food", "SPECIALS / TO EAT", "Bruskete mix", "600 ALL");
-      add("food", "SPECIALS / TO EAT", "Tacos Beef", "750 ALL");
-      add("food", "SPECIALS / TO EAT", "Tacos Chicken", "500 ALL");
-      add("food", "SPECIALS / TO EAT", "Salcice artizanale", "800 ALL");
-      add("food", "SPECIALS / TO EAT", "Patate Amerikane me krem tartufi", "450 ALL");
-      add("food", "SPECIALS / TO EAT", "Fish & Chips", "850 ALL");
-      add("food", "SPECIALS / TO EAT", "Schnitzel pule ose vici", "800 ALL");
-      add("food", "SPECIALS / TO EAT", "French Fries", "350 ALL");
-
-      return items;
-    }
-
-    const menuItems = buildHendonMenu();
-
-    function renderMenu() {
-      const container = document.getElementById('menu-container');
-      container.innerHTML = '';
-
-      // Group by section
-      const sections = {};
-      menuItems.forEach(item => {
-        const sectionName = LANGUAGES[currentLang][item.section] || item.section;
-        if (!sections[sectionName]) sections[sectionName] = [];
-        sections[sectionName].push(item);
-      });
-
-      for (const [section, items] of Object.entries(sections)) {
-        const sectionDiv = document.createElement('div');
-        sectionDiv.classList.add('menu-section');
-        const h2 = document.createElement('h2');
-        h2.textContent = section;
-        sectionDiv.appendChild(h2);
-
-        items.forEach(item => {
-          const itemDiv = document.createElement('div');
-          itemDiv.classList.add('menu-item');
-          let itemName = item.name;
-          if (item.price === "Pyet kamarierin") {
-            itemDiv.textContent = `${itemName} - ${LANGUAGES[currentLang]["Ask waiter"]}`;
-          } else {
-            itemDiv.textContent = `${itemName} - ${item.price}`;
-          }
-          sectionDiv.appendChild(itemDiv);
-        });
-
-        container.appendChild(sectionDiv);
-      }
-    }
-
-    window.setLanguage = function(lang) {
-      currentLang = lang;
-      renderMenu();
-    }
-
-    renderMenu();
-  })();
-  </script>
+  <script src="data/menu-data.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
+

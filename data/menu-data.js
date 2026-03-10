@@ -191,3 +191,99 @@
   window.HENDON_MENU = buildHendonMenu();
 })();
 
+// script.js
+
+// Funksioni për të ndryshuar gjuhën e faqes
+let currentLang = 'sq'; // default shqip
+
+function setLanguage(lang) {
+  currentLang = lang;
+  renderMenu(lang);
+  renderTexts(lang);
+}
+
+// ==================== MENU RENDER ====================
+function renderMenu(lang) {
+  const menuGrid = document.getElementById('menuGrid');
+  if (!menuGrid) return;
+
+  // pastro grid
+  menuGrid.innerHTML = '';
+
+  // rendit sipas seksionit
+  const sections = [...new Set(window.HENDON_MENU.map(item => lang === 'sq' ? item.description_sq : item.description_en))];
+
+  sections.forEach(section => {
+    // titulli i seksionit
+    const sectionEl = document.createElement('div');
+    sectionEl.classList.add('menu-section');
+
+    const h3 = document.createElement('h3');
+    h3.textContent = section;
+    sectionEl.appendChild(h3);
+
+    const itemsList = document.createElement('div');
+    itemsList.classList.add('menu-items');
+
+    window.HENDON_MENU
+      .filter(item => (lang === 'sq' ? item.description_sq : item.description_en) === section)
+      .forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.classList.add('menu-item');
+
+        const nameEl = document.createElement('p');
+        nameEl.classList.add('menu-item-name');
+        nameEl.textContent = lang === 'sq' ? item.name_sq : item.name_en;
+
+        const priceEl = document.createElement('span');
+        priceEl.classList.add('menu-item-price');
+        priceEl.textContent = item.price;
+
+        itemEl.appendChild(nameEl);
+        itemEl.appendChild(priceEl);
+        itemsList.appendChild(itemEl);
+      });
+
+    sectionEl.appendChild(itemsList);
+    menuGrid.appendChild(sectionEl);
+  });
+}
+
+// ==================== TEXTS RENDER ====================
+function renderTexts(lang) {
+  // hero
+  document.getElementById('heroKicker').textContent = lang === 'sq' ? 'Pub & Grill' : 'Pub & Grill';
+  document.getElementById('heroTitle').textContent = lang === 'sq' ? 'Shija e Nates ne Zemer te Qytetit' : 'The Taste of the Night in the Heart of the City';
+  document.getElementById('heroLead').textContent = lang === 'sq' ? 'Atmosfere autentike, kuzhine tradicionale dhe kokteje te kuruara per cdo mbremje.' : 'Authentic atmosphere, traditional cuisine, and carefully crafted cocktails every night.';
+
+  // about
+  document.getElementById('aboutTitle').textContent = lang === 'sq' ? 'Pub me Stil Modern' : 'Modern Style Pub';
+  document.getElementById('aboutText').textContent = lang === 'sq' ? 'Ne ofrojme eksperiencen me te mire te pub-it ne qytet.' : 'We offer the best pub experience in town.';
+
+  // menu title
+  document.getElementById('menuTitle').textContent = lang === 'sq' ? 'Te Preferuarat' : 'Favorites';
+
+  // contact
+  document.getElementById('contactTitle').textContent = lang === 'sq' ? 'Rezervo Tavolinen Tende' : 'Reserve Your Table';
+  document.getElementById('contactText').textContent = lang === 'sq' ? 'Na kontaktoni per rezervime ose informacione.' : 'Contact us for reservations or info.';
+
+  // footer
+  document.getElementById('footerName').textContent = lang === 'sq' ? 'The Hendon Pub' : 'The Hendon Pub';
+}
+
+// ==================== LANGUAGE SWITCH BUTTONS ====================
+document.addEventListener('DOMContentLoaded', () => {
+  // krijo butona thjesht per test
+  const langSwitch = document.createElement('div');
+  langSwitch.innerHTML = `
+    <button id="btn-sq">Shqip</button>
+    <button id="btn-en">English</button>
+  `;
+  document.body.prepend(langSwitch);
+
+  document.getElementById('btn-sq').addEventListener('click', () => setLanguage('sq'));
+  document.getElementById('btn-en').addEventListener('click', () => setLanguage('en'));
+
+  renderMenu(currentLang);
+  renderTexts(currentLang);
+});

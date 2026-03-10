@@ -1,99 +1,195 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hendon Pub - MENU</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hendon Pub | MENU</title>
   <style>
-    body { font-family: Arial, sans-serif; margin:20px; background:#f9f9f9; }
-    #lang-switch img { cursor:pointer; width:25px; vertical-align:middle; }
-    .menu-section { margin-bottom: 20px; }
-    .menu-section h2 { border-bottom: 2px solid #333; padding-bottom: 5px; }
-    .menu-item { margin:5px 0; display:flex; justify-content:space-between; }
-    .menu-item span.name { font-weight:bold; }
-    .menu-item span.desc { font-style:italic; margin-left:10px; color:#555; }
-    .menu-item span.price { font-weight:bold; color:#1a73e8; }
+    body { font-family: Arial, sans-serif; }
+    .flag { cursor: pointer; width: 32px; height: 20px; margin: 5px; }
+    .menu-section { margin-top: 20px; }
+    .menu-item { margin: 5px 0; }
   </style>
 </head>
 <body>
+  <h1 id="menu-title">Hendon Pub - MENU</h1>
+  
+  <!-- Zgjedhja e gjuhës -->
+  <div>
+    <img src="https://flagcdn.com/w20/al.png" alt="Shqip" class="flag" onclick="setLanguage('sq')">
+    <img src="https://flagcdn.com/w20/us.png" alt="English" class="flag" onclick="setLanguage('en')">
+  </div>
+  
+  <div id="menu-container"></div>
 
-<div id="lang-switch" style="text-align:right; margin-bottom:20px;">
-  <!-- Flamuri i Shqipërisë -->
-  <img src="https://flagcdn.com/w20/al.png" id="btn-sq" title="Shqip">
-  <!-- Flamuri i Amerikës -->
-  <img src="https://flagcdn.com/w20/us.png" id="btn-en" title="English">
-</div>
-
-<h1 id="menu-title">Hendon Pub - MENU</h1>
-<div id="menu-container"></div>
-
-<script>
-(function () {
-  function buildHendonMenu() {
-    const items = [];
-    const add = (type, section, name_sq, name_en, price) => {
-      items.push({ id:`m${items.length+1}`, type, name_sq, name_en, section, price });
+  <script>
+  (function () {
+    const LANGUAGES = {
+      sq: {
+        "COFFEE": "KAFE",
+        "FRESH DRINKS": "PIJE TE FRESKTA",
+        "APERITIV": "APERITIV",
+        "COCKTAILS": "COCKTAILS",
+        "MENGJESI": "MËNGJESI",
+        "MASDITE / SNACKS": "MËSDITË / SNACKS",
+        "SPECIALS / TO EAT": "SPECIALS / TO EAT",
+        "LEGJENDA E FORCES": "LEGJENDA E FORCËS",
+        "COCKTAILS TE SUGJERUARA": "COCKTAILS TË SUGJERUARA",
+        "SHOTS & SHOOTERS": "SHOTS & SHOOTERS",
+        "Ask waiter": "Pyet kamarierin"
+      },
+      en: {
+        "COFFEE": "COFFEE",
+        "FRESH DRINKS": "FRESH DRINKS",
+        "APERITIV": "APERITIF",
+        "COCKTAILS": "COCKTAILS",
+        "MENGJESI": "BREAKFAST",
+        "MASDITE / SNACKS": "AFTERNOON / SNACKS",
+        "SPECIALS / TO EAT": "SPECIALS / TO EAT",
+        "LEGJENDA E FORCES": "LEGEND OF STRENGTH",
+        "COCKTAILS TE SUGJERUARA": "RECOMMENDED COCKTAILS",
+        "SHOTS & SHOOTERS": "SHOTS & SHOOTERS",
+        "Pyet kamarierin": "Ask waiter"
+      }
     };
 
-    // **Kafe / Drinks**
-    add("drink", "COFFEE", "Kafe", "Coffee", "120 ALL");
-    add("drink", "COFFEE", "Kafe e ftohte", "Iced Coffee", "150 ALL");
-    add("drink", "COFFEE", "Cappuccino", "Cappuccino", "180 ALL");
-    add("drink", "COFFEE", "Cokollate e ngrohte", "Hot Chocolate", "200 ALL");
-    add("drink", "FRESH DRINKS", "Uje pa gaz", "Still Water", "150 ALL");
-    add("drink", "FRESH DRINKS", "Coca Cola", "Coca Cola", "200 ALL");
+    let currentLang = 'sq';
 
-    // **Food / Mëngjesi**
-    add("food", "MENGJESI", "Omlete normale", "Omelette", "250 ALL");
-    add("food", "MENGJESI", "French Toast", "French Toast", "300 ALL");
+    function buildHendonMenu() {
+      const items = [];
+      const add = (type, section, name, price) => {
+        items.push({ id: `m${items.length + 1}`, type, section, name, price });
+      };
 
-    // Shembull: Cocktails
-    const ask = "Pyet kamarierin / Ask waiter";
-    add("drink", "COCKTAILS TE SUGJERUARA", "Aperol Spritz", "Aperol Spritz", ask);
-    add("drink", "COCKTAILS TE SUGJERUARA", "Mojito", "Mojito", ask);
+      // --- Drinks COFFEE ---
+      add("drink", "COFFEE", "Kafe", "120 ALL");
+      add("drink", "COFFEE", "Kafe e ftohte", "150 ALL");
+      add("drink", "COFFEE", "Makiato", "130 ALL");
+      add("drink", "COFFEE", "Makiato e ftohte", "150 ALL");
+      add("drink", "COFFEE", "Cappuccino", "180 ALL");
+      add("drink", "COFFEE", "Cappuccino (bustine)", "180 ALL");
+      add("drink", "COFFEE", "Cappuccino e ftohte", "250 ALL");
+      add("drink", "COFFEE", "Cokollate e ngrohte", "200 ALL");
+      add("drink", "COFFEE", "Cokollate e ftohte", "250 ALL");
+      add("drink", "COFFEE", "Kakao e ngrohte", "200 ALL");
+      add("drink", "COFFEE", "Kakao e ftohte", "250 ALL");
+      add("drink", "COFFEE", "Salep", "150 ALL");
+      add("drink", "COFFEE", "Caj (bustine)", "120 ALL");
+      add("drink", "COFFEE", "Caj bio", "250 ALL");
+      add("drink", "COFFEE", "Frape", "250 ALL");
 
-    return items;
-  }
+      // --- Fresh Drinks ---
+      add("drink", "FRESH DRINKS", "Uje Lajthiza", "100 ALL");
+      add("drink", "FRESH DRINKS", "Uje pa gaz (M250)", "150 ALL");
+      add("drink", "FRESH DRINKS", "Uje me gaz (M250)", "150 ALL");
+      add("drink", "FRESH DRINKS", "Coca Cola", "200 ALL");
+      add("drink", "FRESH DRINKS", "Lemon Soda", "200 ALL");
+      add("drink", "FRESH DRINKS", "Oran Soda", "200 ALL");
+      add("drink", "FRESH DRINKS", "Ice Tea pjeshke", "200 ALL");
+      add("drink", "FRESH DRINKS", "Ice Tea limon", "200 ALL");
+      add("drink", "FRESH DRINKS", "Red Bull", "400 ALL");
+      add("drink", "FRESH DRINKS", "Rose Lemonade", "400 ALL");
+      add("drink", "FRESH DRINKS", "Britvic", "200 ALL");
+      add("drink", "FRESH DRINKS", "Tonic Fentimans", "400 ALL");
+      add("drink", "FRESH DRINKS", "Grodino", "200 ALL");
+      add("drink", "FRESH DRINKS", "Bitter", "180 ALL");
 
-  window.HENDON_MENU = buildHendonMenu();
+      // --- Aperitiv ---
+      add("drink", "APERITIV", "Aperol Spritz", "500 ALL");
+      add("drink", "APERITIV", "Campari Spritz", "500 ALL");
+      add("drink", "APERITIV", "Hugo", "500 ALL");
 
-  function renderMenu(lang) {
-    const container = document.getElementById('menu-container');
-    container.innerHTML = '';
-    
-    // Grupe sekcioni sipas 'section'
-    const sections = {};
-    window.HENDON_MENU.forEach(item => {
-      if(!sections[item.section]) sections[item.section] = [];
-      sections[item.section].push(item);
-    });
+      // --- Cocktails ---
+      add("drink", "COCKTAILS", "Vesper", "700 ALL");
+      add("drink", "COCKTAILS", "London Mule", "700 ALL");
+      add("drink", "COCKTAILS", "Negroni", "700 ALL");
+      add("drink", "COCKTAILS", "Gimlet", "700 ALL");
+      add("drink", "COCKTAILS", "Espresso Martini", "700 ALL");
+      add("drink", "COCKTAILS", "Bramble", "700 ALL");
+      add("drink", "COCKTAILS", "Churchill", "700 ALL");
+      add("drink", "COCKTAILS", "House Cocktail", "800 ALL");
+      add("drink", "COCKTAILS", "Analcolik", "600 ALL");
+      add("drink", "COCKTAILS", "Bartender Recipe", "800 / 900 / 1000 ALL");
 
-    for (const sec in sections) {
-      const divSec = document.createElement('div');
-      divSec.className = 'menu-section';
-      divSec.innerHTML = `<h2>${sec}</h2>`;
-      sections[sec].forEach(item => {
-        const divItem = document.createElement('div');
-        divItem.className = 'menu-item';
-        divItem.innerHTML = `
-          <span class="name">${lang==='sq'? item.name_sq : item.name_en}</span>
-          <span class="desc">${item.section}</span>
-          <span class="price">${item.price}</span>
-        `;
-        divSec.appendChild(divItem);
-      });
-      container.appendChild(divSec);
+      // --- Food Breakfast ---
+      add("food", "MENGJESI", "Classic Benedict", "500 ALL");
+      add("food", "MENGJESI", "Omlete normale", "250 ALL");
+      add("food", "MENGJESI", "Egg Poached", "300 ALL");
+      add("food", "MENGJESI", "Sunny Side Up", "250 ALL");
+      add("food", "MENGJESI", "Ham & Cheese Sandwich", "150 ALL");
+      add("food", "MENGJESI", "Ham, Egg & Cheese Sandwich", "170 ALL");
+      add("food", "MENGJESI", "Hash Browns", "150 ALL");
+      add("food", "MENGJESI", "French Toast", "300 ALL");
+      add("food", "MENGJESI", "Petulla", "200 ALL");
+
+      // --- Snacks ---
+      add("food", "MASDITE / SNACKS", "Mini Burger", "450 ALL");
+      add("food", "MASDITE / SNACKS", "Chicken Wings", "700 ALL");
+      add("food", "MASDITE / SNACKS", "Chicken Fingers", "650 ALL");
+      add("food", "MASDITE / SNACKS", "Onion Rings", "350 ALL");
+      add("food", "MASDITE / SNACKS", "Kroketa", "350 ALL");
+      add("food", "MASDITE / SNACKS", "Patate fritel", "300 ALL");
+
+      // --- Specials ---
+      add("food", "SPECIALS / TO EAT", "Antipast e ngrohte", "1200 - 2200 ALL");
+      add("food", "SPECIALS / TO EAT", "Bruskete ancuge", "600 ALL");
+      add("food", "SPECIALS / TO EAT", "Bruskete klasike", "400 ALL");
+      add("food", "SPECIALS / TO EAT", "Bruskete mix", "600 ALL");
+      add("food", "SPECIALS / TO EAT", "Tacos Beef", "750 ALL");
+      add("food", "SPECIALS / TO EAT", "Tacos Chicken", "500 ALL");
+      add("food", "SPECIALS / TO EAT", "Salcice artizanale", "800 ALL");
+      add("food", "SPECIALS / TO EAT", "Patate Amerikane me krem tartufi", "450 ALL");
+      add("food", "SPECIALS / TO EAT", "Fish & Chips", "850 ALL");
+      add("food", "SPECIALS / TO EAT", "Schnitzel pule ose vici", "800 ALL");
+      add("food", "SPECIALS / TO EAT", "French Fries", "350 ALL");
+
+      return items;
     }
-  }
 
-  // Ndryshim gjuhësh
-  document.getElementById('btn-sq').addEventListener('click', ()=>renderMenu('sq'));
-  document.getElementById('btn-en').addEventListener('click', ()=>renderMenu('en'));
+    const menuItems = buildHendonMenu();
 
-  // Shfaq si parazgjedhje Shqip
-  renderMenu('sq');
-})();
-</script>
+    function renderMenu() {
+      const container = document.getElementById('menu-container');
+      container.innerHTML = '';
 
+      // Group by section
+      const sections = {};
+      menuItems.forEach(item => {
+        const sectionName = LANGUAGES[currentLang][item.section] || item.section;
+        if (!sections[sectionName]) sections[sectionName] = [];
+        sections[sectionName].push(item);
+      });
+
+      for (const [section, items] of Object.entries(sections)) {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.classList.add('menu-section');
+        const h2 = document.createElement('h2');
+        h2.textContent = section;
+        sectionDiv.appendChild(h2);
+
+        items.forEach(item => {
+          const itemDiv = document.createElement('div');
+          itemDiv.classList.add('menu-item');
+          let itemName = item.name;
+          if (item.price === "Pyet kamarierin") {
+            itemDiv.textContent = `${itemName} - ${LANGUAGES[currentLang]["Ask waiter"]}`;
+          } else {
+            itemDiv.textContent = `${itemName} - ${item.price}`;
+          }
+          sectionDiv.appendChild(itemDiv);
+        });
+
+        container.appendChild(sectionDiv);
+      }
+    }
+
+    window.setLanguage = function(lang) {
+      currentLang = lang;
+      renderMenu();
+    }
+
+    renderMenu();
+  })();
+  </script>
 </body>
 </html>

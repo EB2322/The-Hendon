@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="sq">
 <head>
   <meta charset="UTF-8" />
@@ -15,6 +15,13 @@
     <div class="container nav-wrap">
       <a href="#top" class="logo"><span id="brandName">The Hendon</span></a>
       <button class="menu-toggle" aria-label="Hap menune">☰</button>
+      
+      <!-- BUTONAT PER GJUHE -->
+      <div class="lang-switch">
+        <button class="btn btn-small" id="btnSQ">🇦🇱 Shqip</button>
+        <button class="btn btn-small" id="btnEN">🇬🇧 English</button>
+      </div>
+
       <nav class="nav-links">
         <a href="#about">Rreth Nesh</a>
         <a href="#menu">Menu</a>
@@ -125,129 +132,88 @@
     </div>
   </footer>
 
-  <aside class="control-panel" id="controlPanel" hidden>
-    <div class="panel-header">
-      <h3>Paneli i Menaxhimit</h3>
-      <button id="panelClose" class="btn btn-ghost btn-small">Mbyll</button>
-    </div>
+  <!-- SCRIPT PER BILINGUAL -->
+  <script>
+    const texts = {
+      sq: {
+        nav_about: "Rreth Nesh",
+        nav_menu: "Menu",
+        nav_gallery: "Galeri",
+        nav_contact: "Kontakt",
+        hero_kicker: "Pub & Grill",
+        hero_title: "Shija e Nates ne Zemer te Qytetit",
+        hero_lead: "Atmosfere autentike, kuzhine tradicionale dhe kokteje te kuruara per cdo mbremje.",
+        btn_menu: "Shiko Menune",
+        btn_maps: "Na Gjej ne Maps",
+        about_title: "Pub me Stil Modern",
+        hours: "Orari",
+        address: "Adresa",
+        contact_title: "Rezervo Tavolinen Tende",
+        phone: "+355698757893",
+        footer: "Te gjitha te drejtat e rezervuara.",
+        reviews_tag: "Vleresime",
+        reviews_title: "Cfare Thone Klientet",
+        menu_tag: "Menu",
+        menu_title: "Te Preferuarat"
+      },
+      en: {
+        nav_about: "About Us",
+        nav_menu: "Menu",
+        nav_gallery: "Gallery",
+        nav_contact: "Contact",
+        hero_kicker: "Pub & Grill",
+        hero_title: "Taste of the Night in the Heart of the City",
+        hero_lead: "Authentic atmosphere, traditional cuisine and curated cocktails for every evening.",
+        btn_menu: "View Menu",
+        btn_maps: "Find Us on Maps",
+        about_title: "Modern Style Pub",
+        hours: "Opening Hours",
+        address: "Address",
+        contact_title: "Reserve Your Table",
+        phone: "+355698757893",
+        footer: "All rights reserved.",
+        reviews_tag: "Reviews",
+        reviews_title: "What Customers Say",
+        menu_tag: "Menu",
+        menu_title: "Favorites"
+      }
+    };
 
-    <section class="panel-block">
-      <h4>Menu Editor (admin + user)</h4>
-      <div id="menuEditor"></div>
-      <div class="panel-actions">
-        <button class="btn btn-primary btn-small" id="saveMenuBtn">Ruaj Menune</button>
-        <button class="btn btn-ghost btn-small" id="addMenuItemBtn" hidden>Shto Artikull</button>
-      </div>
-    </section>
+    function setLanguage(lang) {
+      document.querySelector('a[href="#about"]').textContent = texts[lang].nav_about;
+      document.querySelector('a[href="#menu"]').textContent = texts[lang].nav_menu;
+      document.querySelector('a[href="#gallery"]').textContent = texts[lang].nav_gallery;
+      document.querySelector('a[href="#contact"]').textContent = texts[lang].nav_contact;
 
-    <section class="panel-block admin-only" id="generalEditorBlock" hidden>
-      <h4>General Editor (vetem admin)</h4>
-      <label>Emri i biznesit</label>
-      <input id="editBusinessName" type="text" />
-      <label>Hero kicker</label>
-      <input id="editHeroKicker" type="text" />
-      <label>Hero title</label>
-      <input id="editHeroTitle" type="text" />
-      <label>Hero text</label>
-      <textarea id="editHeroLead" rows="3"></textarea>
-      <label>About title</label>
-      <input id="editAboutTitle" type="text" />
-      <label>About text</label>
-      <textarea id="editAboutText" rows="3"></textarea>
-      <label>Menu title</label>
-      <input id="editMenuTitle" type="text" />
-      <label>Orari</label>
-      <input id="editHours" type="text" />
-      <label>Adresa</label>
-      <input id="editAddress" type="text" />
-      <label>Kontakt title</label>
-      <input id="editContactTitle" type="text" />
-      <label>Kontakt text</label>
-      <textarea id="editContactText" rows="3"></textarea>
-      <label>Telefon</label>
-      <input id="editPhone" type="text" />
-      <label>Link Google Maps</label>
-      <input id="editMapsUrl" type="url" />
-      <label>Map embed URL</label>
-      <input id="editMapEmbed" type="url" />
-      <label>Hero image URL</label>
-      <input id="editHeroImage" type="url" />
-      <button class="btn btn-primary btn-small" id="saveGeneralBtn">Ruaj General</button>
-    </section>
+      document.getElementById("heroKicker").textContent = texts[lang].hero_kicker;
+      document.getElementById("heroTitle").textContent = texts[lang].hero_title;
+      document.getElementById("heroLead").textContent = texts[lang].hero_lead;
+      document.querySelector('.hero-actions .btn-primary').textContent = texts[lang].btn_menu;
+      document.getElementById("mapsLink").textContent = texts[lang].btn_maps;
 
-    <section class="panel-block admin-only" id="galleryEditorBlock" hidden>
-      <h4>Gallery Editor (vetem admin)</h4>
-      <label>Import foto nga URL (nje per rresht)</label>
-      <textarea id="galleryUrlsBulk" rows="4" placeholder="https://...&#10;https://..."></textarea>
-      <div class="panel-actions">
-        <button class="btn btn-ghost btn-small" id="importGalleryUrlsBtn">Importo URL</button>
-      </div>
-      <label>Upload foto nga kompjuteri</label>
-      <input id="galleryFileInput" type="file" accept="image/*" multiple />
-      <div id="galleryEditor"></div>
-      <div class="panel-actions">
-        <button class="btn btn-primary btn-small" id="saveGalleryBtn">Ruaj Galerine</button>
-        <button class="btn btn-ghost btn-small" id="addGalleryBtn">Shto Foto</button>
-      </div>
-    </section>
+      document.getElementById("aboutTitle").textContent = texts[lang].about_title;
+      document.querySelector(".about-card h3").textContent = texts[lang].hours;
+      document.querySelectorAll(".about-card h3")[1].textContent = texts[lang].address;
+      document.getElementById("contactTitle").textContent = texts[lang].contact_title;
+      document.getElementById("phoneLink").textContent = texts[lang].phone;
 
-    <section class="panel-block admin-only" id="reviewsEditorBlock" hidden>
-      <h4>Reviews Editor (vetem admin)</h4>
-      <div id="reviewsEditor"></div>
-      <div class="panel-actions">
-        <button class="btn btn-primary btn-small" id="saveReviewsBtn">Ruaj Reviews</button>
-        <button class="btn btn-ghost btn-small" id="addReviewBtn">Shto Review</button>
-      </div>
-    </section>
+      document.querySelector("#reviewsSection .section-tag").textContent = texts[lang].reviews_tag;
+      document.querySelector("#reviewsSection h2").textContent = texts[lang].reviews_title;
 
-    <section class="panel-block admin-only" id="usersBlock" hidden>
-      <h4>Users (vetem admin)</h4>
-      <div id="usersList"></div>
-      <div class="user-add">
-        <input id="newUsername" type="text" placeholder="username" />
-        <input id="newPassword" type="password" placeholder="password" />
-        <select id="newRole">
-          <option value="user">user</option>
-          <option value="admin">admin</option>
-        </select>
-        <button class="btn btn-primary btn-small" id="addUserBtn">Shto User</button>
-      </div>
-    </section>
+      document.querySelector("#menu .section-tag").textContent = texts[lang].menu_tag;
+      document.getElementById("menuTitle").textContent = texts[lang].menu_title;
 
-    <section class="panel-block admin-only" id="passwordBlock" hidden>
-      <h4>Password Manager (vetem admin)</h4>
-      <label>Ndrysho password-in tend</label>
-      <div class="user-add password-grid">
-        <input id="selfNewPassword" type="password" placeholder="password i ri" />
-        <button class="btn btn-primary btn-small" id="changeSelfPasswordBtn">Ndrysho</button>
-      </div>
-      <label>Ndrysho password per user tjeter</label>
-      <div class="user-add password-grid">
-        <select id="passwordTargetUser"></select>
-        <input id="targetNewPassword" type="password" placeholder="password i ri" />
-        <button class="btn btn-primary btn-small" id="changeUserPasswordBtn">Ruaj</button>
-      </div>
-    </section>
+      document.getElementById("footerName").textContent = texts[lang].footer;
+    }
 
-  </aside>
+    document.getElementById("btnSQ").addEventListener("click", () => setLanguage("sq"));
+    document.getElementById("btnEN").addEventListener("click", () => setLanguage("en"));
 
-  <div class="modal" id="loginModal" hidden>
-    <div class="modal-card">
-      <h3>Login</h3>
-      <label>Username</label>
-      <input id="loginUsername" type="text" />
-      <label>Password</label>
-      <input id="loginPassword" type="password" />
-      <div class="panel-actions">
-        <button class="btn btn-primary btn-small" id="submitLoginBtn">Hyr</button>
-        <button class="btn btn-ghost btn-small" id="cancelLoginBtn">Anulo</button>
-      </div>
-      <p id="loginError" class="error-text"></p>
-    </div>
-  </div>
+    // Gjuha default
+    setLanguage("sq");
+  </script>
 
   <script src="data/menu-data.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
-

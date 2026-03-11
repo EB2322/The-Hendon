@@ -7,7 +7,9 @@ const STORAGE_KEYS = {
 };
 
 const GOOGLE_REVIEWS_URL = "https://www.google.com/maps/place/The+Hendon+Pub/@41.3225198,19.7957727,17z/data=!4m8!3m7!1s0x1350310040968bf3:0x3a48075119e30851!8m2!3d41.3223019!4d19.7954807!9m1!1b1!16s%2Fg%2F11xmqhv6hp!17m2!4m1!1e3!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDMwNC4xIKXMDSoASAFQAw%3D%3D";
+const HENDON_GALLERY_LOGO = "assets/gallery/the-hendon-pub.jpg?v=20260311";
 const CUSTOM_GALLERY_IMAGES = [
+  HENDON_GALLERY_LOGO,
   "assets/gallery/hendon-1.jpg",
   "assets/gallery/hendon-2.jpg",
   "assets/gallery/hendon-3.jpg",
@@ -400,6 +402,10 @@ function normalizeUsers(raw) {
 
 function normalizeSiteData(raw) {
   const value = raw && typeof raw === "object" ? raw : {};
+  const gallery = Array.isArray(value.gallery) && value.gallery.length ? value.gallery : [...DEFAULT_DATA.gallery];
+  const normalizedGallery = gallery.includes(HENDON_GALLERY_LOGO)
+    ? gallery
+    : [HENDON_GALLERY_LOGO, ...gallery];
   const content = value.content
     ? {
         sq: normalizeContent(value.content.sq, DEFAULT_CONTENT.sq),
@@ -423,7 +429,7 @@ function normalizeSiteData(raw) {
       tiktok: String((value.links && value.links.tiktok) || (value.contact && value.contact.tiktok) || DEFAULT_LINKS.tiktok)
     },
     menu: normalizeMenu(value.menu),
-    gallery: Array.isArray(value.gallery) && value.gallery.length ? value.gallery : [...DEFAULT_DATA.gallery],
+    gallery: normalizedGallery,
     reviews: normalizeReviews(value.reviews)
   };
 }
@@ -696,9 +702,31 @@ function renderChrome() {
   el.langEnBtn.classList.toggle("active", currentLanguage === "en");
 }
 
+function ensureBrandLogos() {
+  const logoLink = document.querySelector(".logo");
+  if (logoLink && !logoLink.querySelector(".logo-mark")) {
+    const headerLogo = document.createElement("img");
+    headerLogo.className = "logo-mark";
+    logoLink.appendChild(headerLogo);
+  }
+
+  const heroContent = document.querySelector(".hero-content");
+  if (heroContent && !heroContent.querySelector(".hero-logo")) {
+    const heroLogo = document.createElement("img");
+    heroLogo.className = "hero-logo";
+    heroContent.appendChild(heroLogo);
+  }
+
+  document.querySelectorAll(".logo-mark, .hero-logo").forEach((img) => {
+    img.src = HENDON_GALLERY_LOGO;
+    img.alt = "The Hendon Pub logo";
+  });
+}
+
 function renderSite() {
   const content = siteData.content[currentLanguage];
   const links = siteData.links;
+  ensureBrandLogos();
   el.brandName.textContent = content.businessName;
   el.footerName.textContent = content.businessName;
   el.heroKicker.textContent = content.hero.kicker;

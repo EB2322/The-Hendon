@@ -14,17 +14,29 @@
   <header class="site-header" id="top">
     <div class="container nav-wrap">
       <a href="#top" class="logo"><span id="brandName">The Hendon</span></a>
-      <button class="menu-toggle" aria-label="Hap menune">☰</button>
+      <button class="menu-toggle" id="menuToggleBtn" aria-label="Hap menune">☰</button>
       <nav class="nav-links">
-        <a href="#about">Rreth Nesh</a>
-        <a href="#menu">Menu</a>
-        <a href="#gallery">Galeri</a>
-        <a href="#contact">Kontakt</a>
+        <a href="#about" id="navAboutLink">Rreth Nesh</a>
+        <a href="#menu" id="navMenuLink">Menu</a>
+        <a href="#gallery" id="navGalleryLink">Galeri</a>
+        <a href="#contact" id="navContactLink">Kontakt</a>
       </nav>
-      <div class="auth-actions">
+      <div class="top-actions">
+        <div class="lang-switcher" aria-label="Language switcher">
+          <button class="lang-btn active" id="langSqBtn" type="button" aria-label="Shqip">
+            <span class="flag">🇦🇱</span>
+            <span class="lang-code">SQ</span>
+          </button>
+          <button class="lang-btn" id="langEnBtn" type="button" aria-label="English">
+            <span class="flag">🇬🇧</span>
+            <span class="lang-code">EN</span>
+          </button>
+        </div>
+        <div class="auth-actions">
         <button class="btn btn-ghost btn-small" id="manageBtn" hidden>Manage</button>
         <button class="btn btn-ghost btn-small" id="loginBtn">Login</button>
         <button class="btn btn-ghost btn-small" id="logoutBtn" hidden>Logout</button>
+        </div>
       </div>
     </div>
   </header>
@@ -36,7 +48,7 @@
       <h1 id="heroTitle">Shija e Nates ne Zemer te Qytetit</h1>
       <p class="lead" id="heroLead">Atmosfere autentike, kuzhine tradicionale dhe kokteje te kuruara per cdo mbremje.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="#menu">Shiko Menune</a>
+        <a class="btn btn-primary" id="heroMenuBtn" href="#menu">Shiko Menune</a>
         <a class="btn btn-ghost" id="mapsLink" target="_blank" rel="noopener" href="#">Na Gjej ne Maps</a>
       </div>
     </div>
@@ -46,14 +58,14 @@
     <section class="about section" id="about">
       <div class="container about-grid reveal">
         <div>
-          <p class="section-tag">Rreth Nesh</p>
+          <p class="section-tag" id="aboutTag">Rreth Nesh</p>
           <h2 id="aboutTitle">Pub me Stil Modern</h2>
           <p id="aboutText"></p>
         </div>
         <div class="about-card">
-          <h3>Orari</h3>
+          <h3 id="hoursLabel">Orari</h3>
           <p id="hoursText"></p>
-          <h3>Adresa</h3>
+          <h3 id="addressLabel">Adresa</h3>
           <p id="addressText"></p>
           <a class="text-link" id="addressLink" target="_blank" rel="noopener" href="#">Hap lokacionin</a>
         </div>
@@ -62,13 +74,13 @@
 
     <section class="menu section" id="menu">
       <div class="container reveal">
-        <p class="section-tag">Menu</p>
+        <p class="section-tag" id="menuTag">Menu</p>
         <h2 id="menuTitle">Te Preferuarat</h2>
 
         <div class="filters">
-          <button class="filter-btn active" data-filter="all">Te Gjitha</button>
-          <button class="filter-btn" data-filter="food">Ushqim</button>
-          <button class="filter-btn" data-filter="drink">Pije</button>
+          <button class="filter-btn active" id="filterAllBtn" data-filter="all">Te Gjitha</button>
+          <button class="filter-btn" id="filterFoodBtn" data-filter="food">Ushqim</button>
+          <button class="filter-btn" id="filterDrinkBtn" data-filter="drink">Pije</button>
         </div>
 
         <div class="menu-grid" id="menuGrid"></div>
@@ -77,17 +89,17 @@
 
     <section class="gallery section" id="gallery">
       <div class="container reveal">
-        <p class="section-tag">Galeri</p>
-        <h2>Atmosfera</h2>
+        <p class="section-tag" id="galleryTag">Galeri</p>
+        <h2 id="galleryTitle">Atmosfera</h2>
         <div class="gallery-grid" id="galleryGrid"></div>
       </div>
     </section>
 
     <section class="reviews section" id="reviewsSection">
       <div class="container reveal">
-        <p class="section-tag">Vleresime</p>
+        <p class="section-tag" id="reviewsTag">Vleresime</p>
         <div class="reviews-top">
-          <h2>Cfare Thone Klientet</h2>
+          <h2 id="reviewsTitle">Cfare Thone Klientet</h2>
           <a class="btn btn-ghost btn-small" id="allReviewsLink" target="_blank" rel="noopener" href="#">Shiko te gjitha ne Google</a>
         </div>
         <div class="reviews-grid" id="reviewsGrid"></div>
@@ -97,7 +109,7 @@
     <section class="contact section" id="contact">
       <div class="container contact-grid reveal">
         <div>
-          <p class="section-tag">Kontakt</p>
+          <p class="section-tag" id="contactTag">Kontakt</p>
           <h2 id="contactTitle">Rezervo Tavolinen Tende</h2>
           <p id="contactText"></p>
           <a class="btn btn-primary" id="phoneLink" href="tel:+355698757893">+355698757893</a>
@@ -127,12 +139,14 @@
 
   <aside class="control-panel" id="controlPanel" hidden>
     <div class="panel-header">
-      <h3>Paneli i Menaxhimit</h3>
+      <h3 id="panelTitle">Paneli i Menaxhimit</h3>
       <button id="panelClose" class="btn btn-ghost btn-small">Mbyll</button>
     </div>
 
+    <p class="panel-language-note" id="editorLanguageInfo">Po editon gjuhen: Shqip</p>
+
     <section class="panel-block">
-      <h4>Menu Editor (admin + user)</h4>
+      <h4 id="menuEditorTitle">Menu Editor (admin + user)</h4>
       <div id="menuEditor"></div>
       <div class="panel-actions">
         <button class="btn btn-primary btn-small" id="saveMenuBtn">Ruaj Menune</button>
@@ -173,6 +187,17 @@
       <label>Hero image URL</label>
       <input id="editHeroImage" type="url" />
       <button class="btn btn-primary btn-small" id="saveGeneralBtn">Ruaj General</button>
+    </section>
+
+    <section class="panel-block admin-only" id="jsonEditorBlock" hidden>
+      <h4 id="jsonEditorTitle">JSON Data (vetem admin)</h4>
+      <p class="panel-help" id="jsonEditorHelp">Ketu mund te shikosh, importosh ose shkarkosh te gjitha te dhenat e faqes.</p>
+      <textarea id="jsonEditor" rows="14" spellcheck="false"></textarea>
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-small" id="applyJsonBtn">Ruaj JSON</button>
+        <button class="btn btn-ghost btn-small" id="refreshJsonBtn">Rifresko JSON</button>
+        <button class="btn btn-ghost btn-small" id="downloadJsonBtn">Shkarko JSON</button>
+      </div>
     </section>
 
     <section class="panel-block admin-only" id="galleryEditorBlock" hidden>
@@ -233,10 +258,10 @@
 
   <div class="modal" id="loginModal" hidden>
     <div class="modal-card">
-      <h3>Login</h3>
-      <label>Username</label>
+      <h3 id="loginTitle">Login</h3>
+      <label id="loginUsernameLabel">Username</label>
       <input id="loginUsername" type="text" />
-      <label>Password</label>
+      <label id="loginPasswordLabel">Password</label>
       <input id="loginPassword" type="password" />
       <div class="panel-actions">
         <button class="btn btn-primary btn-small" id="submitLoginBtn">Hyr</button>

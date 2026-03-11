@@ -1126,15 +1126,3 @@ renderMenuEditor();
 applySessionUI();
 bindEvents();
 
-
-
-
-
-
-
-
-
-
-
-
-

@@ -25,11 +25,34 @@ html {
 body {
   font-family: "Manrope", sans-serif;
   background:
-    linear-gradient(rgba(9, 7, 5, 0.82), rgba(9, 7, 5, 0.94)),
-    url("assets/gallery/hendon-2.jpg") center top / cover fixed no-repeat,
-    radial-gradient(circle at top, #2b1b10 0%, var(--bg) 40%);
+    radial-gradient(circle at top, rgba(43, 27, 16, 0.9) 0%, rgba(15, 15, 15, 0.96) 42%),
+    #0f0f0f;
   color: var(--text);
   line-height: 1.6;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(rgba(8, 6, 4, 0.5), rgba(8, 6, 4, 0.72)),
+    url("assets/gallery/hendon-2.jpg") center center / cover no-repeat;
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(212, 138, 44, 0.12), transparent 30%),
+    radial-gradient(circle at 80% 18%, rgba(212, 138, 44, 0.08), transparent 24%);
+  pointer-events: none;
 }
 
 img {
@@ -193,7 +216,7 @@ h2 {
   place-items: center;
   text-align: center;
   background:
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.8)),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.72)),
     url("assets/gallery/hendon-1.jpg") center/cover no-repeat;
   overflow: hidden;
 }
@@ -209,6 +232,12 @@ h2 {
 .hero-content {
   position: relative;
   max-width: 760px;
+  padding: 1.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background: rgba(12, 10, 8, 0.42);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(8px);
 }
 
 .kicker {

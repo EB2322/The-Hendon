@@ -26,8 +26,18 @@ const UI = {
     reviewsLink: "Shiko te gjitha ne Google", contactTag: "Kontakt",
     footerRights: "Te gjitha te drejtat e rezervuara.", panelTitle: "Paneli i Menaxhimit", panelClose: "Mbyll",
     editorLanguage: "Po editon gjuhen: Shqip", menuEditorTitle: "Menu Editor (admin + user)", saveMenu: "Ruaj Menune", addItem: "Shto Artikull",
+    generalEditorTitle: "General Editor (vetem admin)", labelBusinessName: "Emri i biznesit", labelHeroKicker: "Hero kicker", labelHeroTitle: "Hero title",
+    labelHeroText: "Hero text", labelAboutTitle: "About title", labelAboutText: "About text", labelMenuTitle: "Menu title", labelHours: "Orari",
+    labelAddress: "Adresa", labelContactTitle: "Kontakt title", labelContactText: "Kontakt text", labelPhone: "Telefon", labelMapsUrl: "Link Google Maps",
+    labelMapEmbed: "Map embed URL", labelHeroImage: "Hero image URL", saveGeneral: "Ruaj General",
     jsonTitle: "JSON Data (vetem admin)", jsonHelp: "Ketu mund te shikosh, importosh ose shkarkosh te gjitha te dhenat e faqes.",
     applyJson: "Ruaj JSON", refreshJson: "Rifresko JSON", downloadJson: "Shkarko JSON",
+    galleryEditorTitle: "Gallery Editor (vetem admin)", labelGalleryImport: "Import foto nga URL (nje per rresht)", importGallery: "Importo URL",
+    labelGalleryUpload: "Upload foto nga kompjuteri", saveGallery: "Ruaj Galerine", addGallery: "Shto Foto",
+    reviewsEditorTitle: "Reviews Editor (vetem admin)", saveReviews: "Ruaj Reviews", addReview: "Shto Review",
+    usersTitle: "Users (vetem admin)", addUser: "Shto User", passwordManagerTitle: "Password Manager (vetem admin)",
+    labelOwnPassword: "Ndrysho password-in tend", changePassword: "Ndrysho", labelOtherPassword: "Ndrysho password per user tjeter", savePassword: "Ruaj",
+    userRole: "user", adminRole: "admin", newPasswordPlaceholder: "password i ri",
     loginTitle: "Hyr", username: "Username", password: "Password", loginSubmit: "Hyr", cancel: "Anulo",
     invalidCredentials: "Kredencialet nuk jane te sakta.", sessionLoggedOut: "Nuk je i loguar.",
     menuEmptyTitle: "Menu bosh", menuEmptyText: "Nuk ka artikuj per kete filter.",
@@ -48,8 +58,18 @@ const UI = {
     reviewsLink: "See all on Google", contactTag: "Contact",
     footerRights: "All rights reserved.", panelTitle: "Management Panel", panelClose: "Close",
     editorLanguage: "Editing language: English", menuEditorTitle: "Menu Editor (admin + user)", saveMenu: "Save Menu", addItem: "Add Item",
+    generalEditorTitle: "General Editor (admin only)", labelBusinessName: "Business name", labelHeroKicker: "Hero kicker", labelHeroTitle: "Hero title",
+    labelHeroText: "Hero text", labelAboutTitle: "About title", labelAboutText: "About text", labelMenuTitle: "Menu title", labelHours: "Opening hours",
+    labelAddress: "Address", labelContactTitle: "Contact title", labelContactText: "Contact text", labelPhone: "Phone", labelMapsUrl: "Google Maps link",
+    labelMapEmbed: "Map embed URL", labelHeroImage: "Hero image URL", saveGeneral: "Save General",
     jsonTitle: "JSON Data (admin only)", jsonHelp: "View, import or download the complete website data here.",
     applyJson: "Save JSON", refreshJson: "Refresh JSON", downloadJson: "Download JSON",
+    galleryEditorTitle: "Gallery Editor (admin only)", labelGalleryImport: "Import photos by URL (one per line)", importGallery: "Import URLs",
+    labelGalleryUpload: "Upload photos from computer", saveGallery: "Save Gallery", addGallery: "Add Photo",
+    reviewsEditorTitle: "Reviews Editor (admin only)", saveReviews: "Save Reviews", addReview: "Add Review",
+    usersTitle: "Users (admin only)", addUser: "Add User", passwordManagerTitle: "Password Manager (admin only)",
+    labelOwnPassword: "Change your password", changePassword: "Change", labelOtherPassword: "Change another user's password", savePassword: "Save",
+    userRole: "user", adminRole: "admin", newPasswordPlaceholder: "new password",
     loginTitle: "Login", username: "Username", password: "Password", loginSubmit: "Login", cancel: "Cancel",
     invalidCredentials: "The credentials are not correct.", sessionLoggedOut: "You are not logged in.",
     menuEmptyTitle: "Empty menu", menuEmptyText: "There are no items for this filter.",
@@ -460,6 +480,7 @@ const el = {
   contactTag: document.getElementById("contactTag"),
   contactTitle: document.getElementById("contactTitle"),
   contactText: document.getElementById("contactText"),
+  footerRights: document.getElementById("footerRights"),
   phoneLink: document.getElementById("phoneLink"),
   instagramLink: document.getElementById("instagramLink"),
   youtubeLink: document.getElementById("youtubeLink"),
@@ -476,6 +497,22 @@ const el = {
   saveMenuBtn: document.getElementById("saveMenuBtn"),
   addMenuItemBtn: document.getElementById("addMenuItemBtn"),
   generalEditorBlock: document.getElementById("generalEditorBlock"),
+  generalEditorTitle: document.getElementById("generalEditorTitle"),
+  labelBusinessName: document.getElementById("labelBusinessName"),
+  labelHeroKicker: document.getElementById("labelHeroKicker"),
+  labelHeroTitle: document.getElementById("labelHeroTitle"),
+  labelHeroText: document.getElementById("labelHeroText"),
+  labelAboutTitle: document.getElementById("labelAboutTitle"),
+  labelAboutText: document.getElementById("labelAboutText"),
+  labelMenuTitle: document.getElementById("labelMenuTitle"),
+  labelHours: document.getElementById("labelHours"),
+  labelAddress: document.getElementById("labelAddress"),
+  labelContactTitle: document.getElementById("labelContactTitle"),
+  labelContactText: document.getElementById("labelContactText"),
+  labelPhone: document.getElementById("labelPhone"),
+  labelMapsUrl: document.getElementById("labelMapsUrl"),
+  labelMapEmbed: document.getElementById("labelMapEmbed"),
+  labelHeroImage: document.getElementById("labelHeroImage"),
   editBusinessName: document.getElementById("editBusinessName"),
   editHeroKicker: document.getElementById("editHeroKicker"),
   editHeroTitle: document.getElementById("editHeroTitle"),
@@ -493,6 +530,9 @@ const el = {
   editHeroImage: document.getElementById("editHeroImage"),
   saveGeneralBtn: document.getElementById("saveGeneralBtn"),
   galleryEditorBlock: document.getElementById("galleryEditorBlock"),
+  galleryEditorTitle: document.getElementById("galleryEditorTitle"),
+  labelGalleryImport: document.getElementById("labelGalleryImport"),
+  labelGalleryUpload: document.getElementById("labelGalleryUpload"),
   galleryEditor: document.getElementById("galleryEditor"),
   saveGalleryBtn: document.getElementById("saveGalleryBtn"),
   addGalleryBtn: document.getElementById("addGalleryBtn"),
@@ -500,6 +540,7 @@ const el = {
   importGalleryUrlsBtn: document.getElementById("importGalleryUrlsBtn"),
   galleryFileInput: document.getElementById("galleryFileInput"),
   reviewsEditorBlock: document.getElementById("reviewsEditorBlock"),
+  reviewsEditorTitle: document.getElementById("reviewsEditorTitle"),
   reviewsEditor: document.getElementById("reviewsEditor"),
   saveReviewsBtn: document.getElementById("saveReviewsBtn"),
   addReviewBtn: document.getElementById("addReviewBtn"),
@@ -511,12 +552,16 @@ const el = {
   refreshJsonBtn: document.getElementById("refreshJsonBtn"),
   downloadJsonBtn: document.getElementById("downloadJsonBtn"),
   usersBlock: document.getElementById("usersBlock"),
+  usersTitle: document.getElementById("usersTitle"),
   usersList: document.getElementById("usersList"),
   newUsername: document.getElementById("newUsername"),
   newPassword: document.getElementById("newPassword"),
   newRole: document.getElementById("newRole"),
   addUserBtn: document.getElementById("addUserBtn"),
   passwordBlock: document.getElementById("passwordBlock"),
+  passwordManagerTitle: document.getElementById("passwordManagerTitle"),
+  labelOwnPassword: document.getElementById("labelOwnPassword"),
+  labelOtherPassword: document.getElementById("labelOtherPassword"),
   selfNewPassword: document.getElementById("selfNewPassword"),
   changeSelfPasswordBtn: document.getElementById("changeSelfPasswordBtn"),
   passwordTargetUser: document.getElementById("passwordTargetUser"),
@@ -590,22 +635,63 @@ function renderChrome() {
   el.reviewsTitle.textContent = tr("reviewsTitle");
   el.allReviewsLink.textContent = tr("reviewsLink");
   el.contactTag.textContent = tr("contactTag");
+  el.footerRights.textContent = tr("footerRights");
   el.panelTitle.textContent = tr("panelTitle");
   el.panelClose.textContent = tr("panelClose");
   el.editorLanguageInfo.textContent = tr("editorLanguage");
   el.menuEditorTitle.textContent = tr("menuEditorTitle");
   el.saveMenuBtn.textContent = tr("saveMenu");
   el.addMenuItemBtn.textContent = tr("addItem");
+  el.generalEditorTitle.textContent = tr("generalEditorTitle");
+  el.labelBusinessName.textContent = tr("labelBusinessName");
+  el.labelHeroKicker.textContent = tr("labelHeroKicker");
+  el.labelHeroTitle.textContent = tr("labelHeroTitle");
+  el.labelHeroText.textContent = tr("labelHeroText");
+  el.labelAboutTitle.textContent = tr("labelAboutTitle");
+  el.labelAboutText.textContent = tr("labelAboutText");
+  el.labelMenuTitle.textContent = tr("labelMenuTitle");
+  el.labelHours.textContent = tr("labelHours");
+  el.labelAddress.textContent = tr("labelAddress");
+  el.labelContactTitle.textContent = tr("labelContactTitle");
+  el.labelContactText.textContent = tr("labelContactText");
+  el.labelPhone.textContent = tr("labelPhone");
+  el.labelMapsUrl.textContent = tr("labelMapsUrl");
+  el.labelMapEmbed.textContent = tr("labelMapEmbed");
+  el.labelHeroImage.textContent = tr("labelHeroImage");
+  el.saveGeneralBtn.textContent = tr("saveGeneral");
   el.jsonEditorTitle.textContent = tr("jsonTitle");
   el.jsonEditorHelp.textContent = tr("jsonHelp");
   el.applyJsonBtn.textContent = tr("applyJson");
   el.refreshJsonBtn.textContent = tr("refreshJson");
   el.downloadJsonBtn.textContent = tr("downloadJson");
+  el.galleryEditorTitle.textContent = tr("galleryEditorTitle");
+  el.labelGalleryImport.textContent = tr("labelGalleryImport");
+  el.importGalleryUrlsBtn.textContent = tr("importGallery");
+  el.labelGalleryUpload.textContent = tr("labelGalleryUpload");
+  el.saveGalleryBtn.textContent = tr("saveGallery");
+  el.addGalleryBtn.textContent = tr("addGallery");
+  el.reviewsEditorTitle.textContent = tr("reviewsEditorTitle");
+  el.saveReviewsBtn.textContent = tr("saveReviews");
+  el.addReviewBtn.textContent = tr("addReview");
+  el.usersTitle.textContent = tr("usersTitle");
+  el.addUserBtn.textContent = tr("addUser");
+  el.passwordManagerTitle.textContent = tr("passwordManagerTitle");
+  el.labelOwnPassword.textContent = tr("labelOwnPassword");
+  el.changeSelfPasswordBtn.textContent = tr("changePassword");
+  el.labelOtherPassword.textContent = tr("labelOtherPassword");
+  el.changeUserPasswordBtn.textContent = tr("savePassword");
   el.loginTitle.textContent = tr("loginTitle");
   el.loginUsernameLabel.textContent = tr("username");
   el.loginPasswordLabel.textContent = tr("password");
   el.submitLoginBtn.textContent = tr("loginSubmit");
   el.cancelLoginBtn.textContent = tr("cancel");
+  el.newUsername.placeholder = tr("username");
+  el.newPassword.placeholder = tr("password");
+  el.selfNewPassword.placeholder = tr("newPasswordPlaceholder");
+  el.targetNewPassword.placeholder = tr("newPasswordPlaceholder");
+  if (el.newRole.options[0]) el.newRole.options[0].textContent = tr("userRole");
+  if (el.newRole.options[1]) el.newRole.options[1].textContent = tr("adminRole");
+  el.mapEmbed.title = currentLanguage === "sq" ? "Lokacioni ne harte" : "Location on the map";
   el.langSqBtn.classList.toggle("active", currentLanguage === "sq");
   el.langEnBtn.classList.toggle("active", currentLanguage === "en");
 }

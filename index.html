@@ -130,7 +130,7 @@
 
   <footer class="site-footer">
     <div class="container">
-      <p>&copy; <span id="year"></span> <span id="footerName">The Hendon Pub</span>. Te gjitha te drejtat e rezervuara.</p>
+      <p>&copy; <span id="year"></span> <span id="footerName">The Hendon Pub</span>. <span id="footerRights">Te gjitha te drejtat e rezervuara.</span></p>
       <p class="small-note" id="sessionInfo"></p>
     </div>
   </footer>
@@ -153,36 +153,36 @@
     </section>
 
     <section class="panel-block admin-only" id="generalEditorBlock" hidden>
-      <h4>General Editor (vetem admin)</h4>
-      <label>Emri i biznesit</label>
+      <h4 id="generalEditorTitle">General Editor (vetem admin)</h4>
+      <label id="labelBusinessName">Emri i biznesit</label>
       <input id="editBusinessName" type="text" />
-      <label>Hero kicker</label>
+      <label id="labelHeroKicker">Hero kicker</label>
       <input id="editHeroKicker" type="text" />
-      <label>Hero title</label>
+      <label id="labelHeroTitle">Hero title</label>
       <input id="editHeroTitle" type="text" />
-      <label>Hero text</label>
+      <label id="labelHeroText">Hero text</label>
       <textarea id="editHeroLead" rows="3"></textarea>
-      <label>About title</label>
+      <label id="labelAboutTitle">About title</label>
       <input id="editAboutTitle" type="text" />
-      <label>About text</label>
+      <label id="labelAboutText">About text</label>
       <textarea id="editAboutText" rows="3"></textarea>
-      <label>Menu title</label>
+      <label id="labelMenuTitle">Menu title</label>
       <input id="editMenuTitle" type="text" />
-      <label>Orari</label>
+      <label id="labelHours">Orari</label>
       <input id="editHours" type="text" />
-      <label>Adresa</label>
+      <label id="labelAddress">Adresa</label>
       <input id="editAddress" type="text" />
-      <label>Kontakt title</label>
+      <label id="labelContactTitle">Kontakt title</label>
       <input id="editContactTitle" type="text" />
-      <label>Kontakt text</label>
+      <label id="labelContactText">Kontakt text</label>
       <textarea id="editContactText" rows="3"></textarea>
-      <label>Telefon</label>
+      <label id="labelPhone">Telefon</label>
       <input id="editPhone" type="text" />
-      <label>Link Google Maps</label>
+      <label id="labelMapsUrl">Link Google Maps</label>
       <input id="editMapsUrl" type="url" />
-      <label>Map embed URL</label>
+      <label id="labelMapEmbed">Map embed URL</label>
       <input id="editMapEmbed" type="url" />
-      <label>Hero image URL</label>
+      <label id="labelHeroImage">Hero image URL</label>
       <input id="editHeroImage" type="url" />
       <button class="btn btn-primary btn-small" id="saveGeneralBtn">Ruaj General</button>
     </section>
@@ -199,13 +199,13 @@
     </section>
 
     <section class="panel-block admin-only" id="galleryEditorBlock" hidden>
-      <h4>Gallery Editor (vetem admin)</h4>
-      <label>Import foto nga URL (nje per rresht)</label>
+      <h4 id="galleryEditorTitle">Gallery Editor (vetem admin)</h4>
+      <label id="labelGalleryImport">Import foto nga URL (nje per rresht)</label>
       <textarea id="galleryUrlsBulk" rows="4" placeholder="https://...&#10;https://..."></textarea>
       <div class="panel-actions">
         <button class="btn btn-ghost btn-small" id="importGalleryUrlsBtn">Importo URL</button>
       </div>
-      <label>Upload foto nga kompjuteri</label>
+      <label id="labelGalleryUpload">Upload foto nga kompjuteri</label>
       <input id="galleryFileInput" type="file" accept="image/*" multiple />
       <div id="galleryEditor"></div>
       <div class="panel-actions">
@@ -215,7 +215,7 @@
     </section>
 
     <section class="panel-block admin-only" id="reviewsEditorBlock" hidden>
-      <h4>Reviews Editor (vetem admin)</h4>
+      <h4 id="reviewsEditorTitle">Reviews Editor (vetem admin)</h4>
       <div id="reviewsEditor"></div>
       <div class="panel-actions">
         <button class="btn btn-primary btn-small" id="saveReviewsBtn">Ruaj Reviews</button>
@@ -224,7 +224,7 @@
     </section>
 
     <section class="panel-block admin-only" id="usersBlock" hidden>
-      <h4>Users (vetem admin)</h4>
+      <h4 id="usersTitle">Users (vetem admin)</h4>
       <div id="usersList"></div>
       <div class="user-add">
         <input id="newUsername" type="text" placeholder="username" />
@@ -238,13 +238,13 @@
     </section>
 
     <section class="panel-block admin-only" id="passwordBlock" hidden>
-      <h4>Password Manager (vetem admin)</h4>
-      <label>Ndrysho password-in tend</label>
+      <h4 id="passwordManagerTitle">Password Manager (vetem admin)</h4>
+      <label id="labelOwnPassword">Ndrysho password-in tend</label>
       <div class="user-add password-grid">
         <input id="selfNewPassword" type="password" placeholder="password i ri" />
         <button class="btn btn-primary btn-small" id="changeSelfPasswordBtn">Ndrysho</button>
       </div>
-      <label>Ndrysho password per user tjeter</label>
+      <label id="labelOtherPassword">Ndrysho password per user tjeter</label>
       <div class="user-add password-grid">
         <select id="passwordTargetUser"></select>
         <input id="targetNewPassword" type="password" placeholder="password i ri" />

@@ -122,6 +122,56 @@ h2 {
   gap: 0.4rem;
 }
 
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.24rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+.lang-btn {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lang-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.lang-btn.active {
+  background: linear-gradient(135deg, rgba(212, 138, 44, 0.95), rgba(165, 103, 26, 0.95));
+  box-shadow: 0 8px 18px rgba(212, 138, 44, 0.28);
+}
+
+.flag {
+  font-size: 1.22rem;
+  line-height: 1;
+}
+
+.auth-actions .btn {
+  min-width: 66px;
+  text-align: center;
+}
+
 .menu-toggle {
   display: none;
   background: none;
@@ -209,6 +259,7 @@ h2 {
 
 .btn-ghost:hover {
   border-color: #fff;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .about-grid,
@@ -687,6 +738,11 @@ iframe {
 
   .auth-actions {
     margin-left: auto;
+  }
+
+  .top-actions {
+    margin-left: auto;
+    gap: 0.45rem;
   }
 
   .gallery-grid,

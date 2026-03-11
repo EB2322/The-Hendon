@@ -42,7 +42,7 @@ const UI = {
     invalidCredentials: "Kredencialet nuk jane te sakta.", sessionLoggedOut: "Nuk je i loguar.",
     menuEmptyTitle: "Menu bosh", menuEmptyText: "Nuk ka artikuj per kete filter.",
     legendNa: "Jeshile: Jo alkolike", legendLight: "E verdhe: Te lehta", legendStrong: "E kuqe: Te forta",
-    badgeNa: "Jo alkolike", badgeLight: "E lehte", badgeStrong: "E forte", galleryAlt: "Foto e ambientit",
+    badgeNa: "Jo alkolike", badgeLight: "E lehte", badgeStrong: "E forte", galleryAlt: "Foto e ambientit", askWaiter: "Pyet kamarierin",
     menuSaved: "Menu u ruajt.", generalSaved: "General u ruajt.", gallerySaved: "Galeria u ruajt.", reviewsSaved: "Reviews u ruajten.",
     jsonSaved: "JSON u ruajt me sukses.", jsonInvalid: "JSON nuk eshte valid.", validUrls: "Vendos URL valide, nje per rresht.",
     fillUsernamePassword: "Ploteso username dhe password.", usernameExists: "Ky username ekziston.",
@@ -74,7 +74,7 @@ const UI = {
     invalidCredentials: "The credentials are not correct.", sessionLoggedOut: "You are not logged in.",
     menuEmptyTitle: "Empty menu", menuEmptyText: "There are no items for this filter.",
     legendNa: "Green: Non-alcoholic", legendLight: "Yellow: Light", legendStrong: "Red: Strong",
-    badgeNa: "Non-alcoholic", badgeLight: "Light", badgeStrong: "Strong", galleryAlt: "Venue photo",
+    badgeNa: "Non-alcoholic", badgeLight: "Light", badgeStrong: "Strong", galleryAlt: "Venue photo", askWaiter: "Ask the waiter",
     menuSaved: "Menu saved.", generalSaved: "General content saved.", gallerySaved: "Gallery saved.", reviewsSaved: "Reviews saved.",
     jsonSaved: "JSON saved successfully.", jsonInvalid: "The JSON is not valid.", validUrls: "Enter valid URLs, one per line.",
     fillUsernamePassword: "Enter both username and password.", usernameExists: "This username already exists.",
@@ -732,6 +732,14 @@ function getBadge(item) {
   return null;
 }
 
+function localizePrice(price) {
+  const value = String(price || "").trim();
+  if (value.toLowerCase() === "pyet kamarierin" || value.toLowerCase() === "ask the waiter") {
+    return tr("askWaiter");
+  }
+  return value;
+}
+
 function renderMenuGrid() {
   const items = siteData.menu.filter((item) => menuFilter === "all" || item.type === menuFilter);
   if (!items.length) {
@@ -748,7 +756,7 @@ function renderMenuGrid() {
   const html = [...groups.entries()].map(([section, group]) => {
     const rows = group.map((item) => {
       const badge = getBadge(item);
-      return `<li class="menu-row"><div class="menu-row-main"><span class="menu-row-title">${escapeHtml(item.name[currentLanguage] || item.name.sq)}</span>${badge ? `<span class="strength-pill ${badge.className}">${escapeHtml(badge.label)}</span>` : ""}</div><span class="menu-row-price">${escapeHtml(item.price)}</span></li>`;
+      return `<li class="menu-row"><div class="menu-row-main"><span class="menu-row-title">${escapeHtml(item.name[currentLanguage] || item.name.sq)}</span>${badge ? `<span class="strength-pill ${badge.className}">${escapeHtml(badge.label)}</span>` : ""}</div><span class="menu-row-price">${escapeHtml(localizePrice(item.price))}</span></li>`;
     }).join("");
     return `<article class="menu-section"><h3>${escapeHtml(section)}</h3><ul class="menu-list">${rows}</ul></article>`;
   }).join("");

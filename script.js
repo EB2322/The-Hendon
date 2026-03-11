@@ -906,6 +906,20 @@ function fileToDataUrl(file) {
   });
 }
 
+function handleLoginSubmit() {
+  const user = users.find((entry) => entry.username === el.loginUsername.value.trim() && entry.password === el.loginPassword.value.trim());
+  if (!user) {
+    el.loginError.textContent = tr("invalidCredentials");
+    return;
+  }
+  session = { username: user.username, role: user.role };
+  save(STORAGE_KEYS.session, session);
+  el.loginUsername.value = "";
+  el.loginPassword.value = "";
+  el.loginModal.hidden = true;
+  renderAll();
+}
+
 function bindEvents() {
   window.addEventListener("scroll", () => el.header.classList.toggle("scrolled", window.scrollY > 20));
   el.menuToggle.addEventListener("click", () => el.navLinks.classList.toggle("open"));
@@ -927,18 +941,18 @@ function bindEvents() {
     el.loginModal.hidden = false;
   });
   el.cancelLoginBtn.addEventListener("click", () => { el.loginModal.hidden = true; });
-  el.submitLoginBtn.addEventListener("click", () => {
-    const user = users.find((entry) => entry.username === el.loginUsername.value.trim() && entry.password === el.loginPassword.value.trim());
-    if (!user) {
-      el.loginError.textContent = tr("invalidCredentials");
-      return;
+  el.submitLoginBtn.addEventListener("click", handleLoginSubmit);
+  el.loginUsername.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleLoginSubmit();
     }
-    session = { username: user.username, role: user.role };
-    save(STORAGE_KEYS.session, session);
-    el.loginUsername.value = "";
-    el.loginPassword.value = "";
-    el.loginModal.hidden = true;
-    renderAll();
+  });
+  el.loginPassword.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleLoginSubmit();
+    }
   });
   el.logoutBtn.addEventListener("click", () => {
     session = null;

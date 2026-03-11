@@ -707,17 +707,10 @@ function ensureBrandLogos() {
   if (logoLink && !logoLink.querySelector(".logo-mark")) {
     const headerLogo = document.createElement("img");
     headerLogo.className = "logo-mark";
-    logoLink.appendChild(headerLogo);
+    logoLink.prepend(headerLogo);
   }
 
-  const heroContent = document.querySelector(".hero-content");
-  if (heroContent && !heroContent.querySelector(".hero-logo")) {
-    const heroLogo = document.createElement("img");
-    heroLogo.className = "hero-logo";
-    heroContent.appendChild(heroLogo);
-  }
-
-  document.querySelectorAll(".logo-mark, .hero-logo").forEach((img) => {
+  document.querySelectorAll(".logo-mark").forEach((img) => {
     img.src = HENDON_GALLERY_LOGO;
     img.alt = "The Hendon Pub logo";
   });

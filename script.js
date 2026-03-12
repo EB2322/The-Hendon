@@ -1076,6 +1076,77 @@ function formatDateTime(value) {
   }).format(date);
 }
 
+function buildInvoicePrintMarkup(invoice) {
+  const rows = invoice.items.map((item) => `
+    <tr>
+      <td>${escapeHtml(String(item.qty))}x</td>
+      <td>${escapeHtml(item.name[currentLanguage] || item.name.sq)}</td>
+      <td>${escapeHtml(formatCurrency(item.totalPrice))}</td>
+    </tr>
+  `).join("");
+  return `<!doctype html>
+  <html lang="${escapeAttr(currentLanguage)}">
+    <head>
+      <meta charset="utf-8" />
+      <title>${escapeHtml(invoice.number)}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 18px; color: #111; }
+        h1, h2, p { margin: 0 0 8px; }
+        .meta { margin-bottom: 14px; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 6px 0; border-bottom: 1px solid #ddd; text-align: left; font-size: 13px; }
+        th:last-child, td:last-child { text-align: right; }
+        .total { margin-top: 12px; font-weight: 700; text-align: right; }
+        .note { margin-top: 10px; font-size: 13px; }
+        @media print {
+          body { margin: 10mm; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>The Hendon</h1>
+      <h2>${escapeHtml(invoice.number)}</h2>
+      <div class="meta">
+        <p>${escapeHtml(tr("orderCreated"))}: ${escapeHtml(formatDateTime(invoice.createdAt))}</p>
+        <p>${escapeHtml(tr("orderTableLabel"))}: ${escapeHtml(invoice.table || "-")}</p>
+        <p>${escapeHtml(tr("orderCustomerLabel"))}: ${escapeHtml(invoice.customer || tr("untitledCustomer"))}</p>
+        <p>${escapeHtml(getRoleLabel("waiter"))}: ${escapeHtml(invoice.waiter || "-")}</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>${escapeHtml(tr("quantityLabel"))}</th>
+            <th>${escapeHtml(tr("invoiceItems"))}</th>
+            <th>${escapeHtml(tr("lineTotal"))}</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      ${invoice.note ? `<p class="note">${escapeHtml(invoice.note)}</p>` : ""}
+      <p class="total">${escapeHtml(tr("orderTotal"))}: ${escapeHtml(formatCurrency(invoice.total))}</p>
+    </body>
+  </html>`;
+}
+
+function printInvoice(invoice, printWindow) {
+  const targetWindow = printWindow && !printWindow.closed ? printWindow : window.open("", "_blank", "width=480,height=720");
+  if (!targetWindow) return;
+  targetWindow.document.open();
+  targetWindow.document.write(buildInvoicePrintMarkup(invoice));
+  targetWindow.document.close();
+  targetWindow.focus();
+  targetWindow.onload = () => {
+    targetWindow.print();
+    targetWindow.onafterprint = () => {
+      try {
+        targetWindow.close();
+      } catch {
+        // Ignore close errors from browser.
+      }
+    };
+  };
+}
+
 function getInvoiceProgress(invoice) {
   const states = Object.values(invoice.stationStatus || {}).filter((value) => value !== "na");
   if (!states.length) return "na";
@@ -1695,6 +1766,8 @@ async function submitCurrentOrder() {
     alert(tr("orderNeedsItems"));
     return;
   }
+  const printWindow = window.open("", "_blank", "width=480,height=720");
+  let createdInvoice = null;
   if (backendAvailable === false) {
     const createdAt = new Date();
     const number = buildInvoiceNumber(createdAt);
@@ -1702,7 +1775,7 @@ async function submitCurrentOrder() {
       ...item,
       id: `${number}-L${idx + 1}`
     }, idx));
-    invoices.unshift({
+    createdInvoice = {
       id: `${number}-${createdAt.getTime()}`,
       number,
       createdAt: createdAt.toISOString(),
@@ -1713,15 +1786,17 @@ async function submitCurrentOrder() {
       items,
       total: items.reduce((sum, item) => sum + item.totalPrice, 0),
       stationStatus: buildStationStatus(items)
-    });
+    };
+    invoices.unshift(createdInvoice);
     persistInvoices();
     orderDraft = createEmptyOrderDraft();
     renderAll();
+    printInvoice(createdInvoice, printWindow);
     alert(tr("orderSubmitted"));
     return;
   }
   try {
-    await apiRequest("/api/invoices", {
+    const payload = await apiRequest("/api/invoices", {
       method: "POST",
       body: {
         table: orderDraft.table.trim(),
@@ -1730,10 +1805,15 @@ async function submitCurrentOrder() {
         items: orderDraft.items
       }
     });
+    createdInvoice = normalizeInvoices([payload.invoice])[0] || null;
     orderDraft = createEmptyOrderDraft();
     await refreshBootstrap({ render: true, preserveDraft: false });
+    if (createdInvoice) printInvoice(createdInvoice, printWindow);
     alert(tr("orderSubmitted"));
   } catch (error) {
+    if (printWindow && !printWindow.closed) {
+      printWindow.close();
+    }
     alert(error.message);
   }
 }

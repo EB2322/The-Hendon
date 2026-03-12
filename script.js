@@ -786,6 +786,7 @@ const el = {
   loginPasswordLabel: document.getElementById("loginPasswordLabel"),
   loginUsername: document.getElementById("loginUsername"),
   loginPassword: document.getElementById("loginPassword"),
+  toggleLoginPasswordBtn: document.getElementById("toggleLoginPasswordBtn"),
   submitLoginBtn: document.getElementById("submitLoginBtn"),
   cancelLoginBtn: document.getElementById("cancelLoginBtn"),
   loginError: document.getElementById("loginError"),
@@ -795,6 +796,13 @@ const el = {
 
 function tr(key) {
   return UI[currentLanguage][key];
+}
+
+function updatePasswordToggleLabel() {
+  if (!el.toggleLoginPasswordBtn) return;
+  const visible = el.loginPassword.type === "text";
+  el.toggleLoginPasswordBtn.textContent = visible ? "Hide" : "Show";
+  el.toggleLoginPasswordBtn.setAttribute("aria-label", visible ? "Fsheh passwordin" : "Shfaq passwordin");
 }
 
 function escapeHtml(value) {
@@ -1841,7 +1849,13 @@ function bindEvents() {
   el.loginBtn.addEventListener("click", () => {
     if (!STAFF_TOOLS_ENABLED) return;
     el.loginError.textContent = "";
+    el.loginPassword.type = "password";
+    updatePasswordToggleLabel();
     el.loginModal.hidden = false;
+  });
+  el.toggleLoginPasswordBtn.addEventListener("click", () => {
+    el.loginPassword.type = el.loginPassword.type === "password" ? "text" : "password";
+    updatePasswordToggleLabel();
   });
   el.cancelLoginBtn.addEventListener("click", () => { el.loginModal.hidden = true; });
   el.submitLoginBtn.addEventListener("click", handleLoginSubmit);
@@ -2118,6 +2132,7 @@ function bindEvents() {
 
 renderAll();
 bindEvents();
+updatePasswordToggleLabel();
 refreshBootstrap({ render: true, preserveDraft: false }).catch((error) => {
   el.sessionInfo.textContent = error.message;
 });

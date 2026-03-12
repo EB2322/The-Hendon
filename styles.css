@@ -979,6 +979,32 @@ iframe {
   margin-bottom: 0.4rem;
 }
 
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 4.8rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.password-toggle:hover {
+  color: var(--text);
+}
+
 .error-text {
   margin-top: 0.4rem;
   color: #ff8484;

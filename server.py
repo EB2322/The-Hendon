@@ -2,6 +2,10 @@ import json
 import os
 import re
 import secrets
+import subprocess
+import tempfile
+import threading
+import time
 from datetime import timedelta
 from http import HTTPStatus
 from http.cookies import SimpleCookie
@@ -19,6 +23,84 @@ STORE = HendonStore(BASE_DIR / "data" / "hendon.sqlite3", BASE_DIR / "data" / "m
 SESSION_COOKIE = "hendon_session"
 HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "5500"))
+PRINT_TICKETS = os.environ.get("PRINT_TICKETS", "1").strip().lower() not in {"0", "false", "no", "off"}
+
+
+def format_ticket_amount(amount: Any) -> str:
+    try:
+        value = int(round(float(amount)))
+    except (TypeError, ValueError):
+        value = 0
+    return f"{value} ALL"
+
+
+def ticket_timestamp(value: str) -> str:
+    return value.replace("T", " ").split(".", 1)[0]
+
+
+def build_station_ticket(invoice: dict[str, Any], station: str) -> str | None:
+    station_label = "BANAK" if station == "bar" else "GUZHINE"
+    items = [item for item in invoice.get("items", []) if item.get("station") == station]
+    if not items:
+        return None
+    lines = [
+        "THE HENDON",
+        station_label,
+        "",
+        f"Fatura: {invoice.get('number', '-')}",
+        f"Koha: {ticket_timestamp(str(invoice.get('createdAt') or ''))}",
+        f"Kamarieri: {invoice.get('waiter') or '-'}",
+        f"Tavolina: {invoice.get('table') or '-'}",
+        f"Klienti: {invoice.get('customer') or 'Pa emer'}",
+        "",
+        "Artikujt:",
+    ]
+    for item in items:
+        name = item.get("name") if isinstance(item.get("name"), dict) else {}
+        item_name = str(name.get("sq") or name.get("en") or item.get("menuId") or "Artikull")
+        lines.append(f"{int(item.get('qty') or 1)}x {item_name} - {format_ticket_amount(item.get('totalPrice'))}")
+    note = str(invoice.get("note") or "").strip()
+    if note:
+        lines.extend(["", f"Shenim: {note}"])
+    lines.extend(["", f"Totali: {format_ticket_amount(sum(int(item.get('totalPrice') or 0) for item in items))}"])
+    return "\r\n".join(lines) + "\r\n"
+
+
+def print_text_to_default_printer(text: str) -> None:
+    if os.name != "nt" or not PRINT_TICKETS:
+        return
+
+    def worker() -> None:
+        temp_path = ""
+        try:
+            with tempfile.NamedTemporaryFile("w", delete=False, encoding="utf-8", suffix=".txt") as handle:
+                handle.write(text)
+                temp_path = handle.name
+            subprocess.run(
+                [r"C:\WINDOWS\system32\notepad.exe", "/p", temp_path],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=20,
+            )
+        except Exception as error:
+            print(f"Ticket print failed: {error}")
+        finally:
+            if temp_path:
+                time.sleep(3)
+                try:
+                    os.remove(temp_path)
+                except OSError:
+                    pass
+
+    threading.Thread(target=worker, daemon=True).start()
+
+
+def print_invoice_tickets(invoice: dict[str, Any]) -> None:
+    for station in ("bar", "kitchen"):
+        ticket = build_station_ticket(invoice, station)
+        if ticket:
+            print_text_to_default_printer(ticket)
 
 
 class HendonHandler(SimpleHTTPRequestHandler):
@@ -274,6 +356,7 @@ class HendonHandler(SimpleHTTPRequestHandler):
                         (invoice["id"], invoice["number"], invoice["createdAt"], invoice["waiter"], invoice["table"], invoice["customer"], invoice["note"], invoice["total"], json.dumps(invoice["stationStatus"]), json.dumps(invoice["items"])),
                     )
                     connection.commit()
+                    print_invoice_tickets(invoice)
                     self.send_json(HTTPStatus.CREATED, {"invoice": invoice})
                     return
 

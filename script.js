@@ -27,6 +27,7 @@ const STATION_BY_TYPE = {
 const NON_ORDERABLE_SECTIONS = ["LEGJENDA E FORCES", "STRENGTH GUIDE"];
 const STAFF_TOOLS_ENABLED = true;
 const API_POLL_INTERVAL_MS = 5000;
+const INACTIVITY_LOGOUT_MS = 60 * 1000;
 
 const UI = {
   sq: {
@@ -72,7 +73,7 @@ const UI = {
     stationBar: "Banak", stationKitchen: "Kuzhine", analyticsTitle: "Xhiro dhe Historik", dailyRevenue: "Xhiro ditore",
     weeklyRevenue: "Xhiro javore", monthlyRevenue: "Xhiro mujore", invoiceHistoryTitle: "Historiku i faturave", noInvoices: "Nuk ka ende fatura te regjistruara.",
     invoiceNumber: "Fatura", invoiceItems: "Artikuj", lineTotal: "Totali i rreshtit", deleteUserLabel: "Fshi", noMenuMatches: "Nuk u gjet asnje artikull ne menu.",
-    priceLabel: "Cmimi", quantityLabel: "Sasia", myRoleLabel: "Roli", untitledCustomer: "Pa emer"
+    priceLabel: "Cmimi", quantityLabel: "Sasia", myRoleLabel: "Roli", untitledCustomer: "Pa emer", allCategories: "Te gjitha"
   },
   en: {
     navAbout: "About", navMenu: "Menu", navGallery: "Gallery", navContact: "Contact",
@@ -117,7 +118,7 @@ const UI = {
     stationBar: "Bar", stationKitchen: "Kitchen", analyticsTitle: "Revenue and History", dailyRevenue: "Daily revenue",
     weeklyRevenue: "Weekly revenue", monthlyRevenue: "Monthly revenue", invoiceHistoryTitle: "Invoice history", noInvoices: "No invoices have been recorded yet.",
     invoiceNumber: "Invoice", invoiceItems: "Items", lineTotal: "Line total", deleteUserLabel: "Delete", noMenuMatches: "No menu items matched your search.",
-    priceLabel: "Price", quantityLabel: "Qty", myRoleLabel: "Role", untitledCustomer: "Walk-in"
+    priceLabel: "Price", quantityLabel: "Qty", myRoleLabel: "Role", untitledCustomer: "Walk-in", allCategories: "All"
   }
 };
 
@@ -563,6 +564,7 @@ function createEmptyOrderDraft() {
     customer: "",
     note: "",
     search: "",
+    category: "all",
     items: []
   };
 }
@@ -610,6 +612,7 @@ let menuFilter = "all";
 let orderDraft = createEmptyOrderDraft();
 let syncTimer = null;
 let backendAvailable = null;
+let inactivityTimer = null;
 
 const el = {
   metaDescription: document.querySelector('meta[name="description"]'),
@@ -678,6 +681,7 @@ const el = {
   orderNoteInput: document.getElementById("orderNoteInput"),
   orderSearchLabel: document.getElementById("orderSearchLabel"),
   orderSearchInput: document.getElementById("orderSearchInput"),
+  orderCategoryBar: document.getElementById("orderCategoryBar"),
   orderCatalog: document.getElementById("orderCatalog"),
   orderCart: document.getElementById("orderCart"),
   orderTotalLabel: document.getElementById("orderTotalLabel"),
@@ -820,6 +824,42 @@ function clearSyncTimer() {
   }
 }
 
+function clearInactivityTimer() {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = null;
+  }
+}
+
+async function performLogout(options = {}) {
+  const { render = true, notify = false } = options;
+  if (backendAvailable !== false) {
+    try {
+      await apiRequest("/api/auth/logout", {
+        method: "POST",
+        suppressAuthReset: true
+      });
+    } catch {
+      // Clear local session state even if the logout request fails.
+    }
+  }
+  clearAuthenticatedState();
+  if (render) renderAll();
+  if (notify) {
+    el.sessionInfo.textContent = currentLanguage === "sq"
+      ? "Sesioni u mbyll pas 1 minute pa aktivitet."
+      : "You were logged out after 1 minute of inactivity.";
+  }
+}
+
+function resetInactivityTimer() {
+  clearInactivityTimer();
+  if (!session) return;
+  inactivityTimer = window.setTimeout(() => {
+    performLogout({ render: true, notify: true });
+  }, INACTIVITY_LOGOUT_MS);
+}
+
 function initializeLocalState() {
   siteData = normalizeSiteData(load(STORAGE_KEYS.data, null) || load(STORAGE_KEYS.legacyData, DEFAULT_DATA));
   users = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS));
@@ -847,6 +887,7 @@ function clearAuthenticatedState() {
   invoices = [];
   orderDraft = createEmptyOrderDraft();
   clearSyncTimer();
+  clearInactivityTimer();
   if (backendAvailable === false) {
     persistSession();
   }
@@ -917,6 +958,7 @@ function updateSyncTimer() {
   syncTimer = window.setInterval(() => {
     refreshInvoicesFromServer().catch(() => {});
   }, API_POLL_INTERVAL_MS);
+  resetInactivityTimer();
 }
 
 function renderOperationalPanels() {
@@ -1328,9 +1370,22 @@ function renderOrderCatalog() {
   el.orderNoteInput.value = orderDraft.note;
   el.orderSearchInput.value = orderDraft.search;
 
+  const categories = [...new Set(siteData.menu
+    .filter((item) => isOrderableMenuItem(item))
+    .map((item) => item.section[currentLanguage] || item.section.sq))];
+  if (orderDraft.category !== "all" && !categories.includes(orderDraft.category)) {
+    orderDraft.category = "all";
+  }
+  el.orderCategoryBar.innerHTML = [
+    `<button class="order-category-btn ${orderDraft.category === "all" ? "active" : ""}" data-category="all" type="button">${escapeHtml(tr("allCategories"))}</button>`,
+    ...categories.map((category) => `<button class="order-category-btn ${orderDraft.category === category ? "active" : ""}" data-category="${escapeAttr(category)}" type="button">${escapeHtml(category)}</button>`)
+  ].join("");
+
   const query = orderDraft.search.trim().toLowerCase();
   const items = siteData.menu.filter((item) => {
     if (!isOrderableMenuItem(item)) return false;
+    const section = item.section[currentLanguage] || item.section.sq;
+    if (orderDraft.category !== "all" && section !== orderDraft.category) return false;
     if (!query) return true;
     const haystack = `${item.name.sq} ${item.name.en} ${item.section.sq} ${item.section.en}`.toLowerCase();
     return haystack.includes(query);
@@ -1802,6 +1857,7 @@ async function handleLoginSubmit() {
     persistSession();
     users = normalizeUserSummaries(load(STORAGE_KEYS.users, DEFAULT_USERS));
     orderDraft = createEmptyOrderDraft();
+    resetInactivityTimer();
     el.loginUsername.value = "";
     el.loginPassword.value = "";
     el.loginError.textContent = "";
@@ -1832,6 +1888,12 @@ async function handleLoginSubmit() {
 
 function bindEvents() {
   window.addEventListener("scroll", () => el.header.classList.toggle("scrolled", window.scrollY > 20));
+  ["click", "keydown", "mousemove", "scroll", "touchstart"].forEach((eventName) => {
+    document.addEventListener(eventName, () => {
+      if (!session) return;
+      resetInactivityTimer();
+    }, { passive: true });
+  });
   el.menuToggle.addEventListener("click", () => el.navLinks.classList.toggle("open"));
   el.navLinks.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => el.navLinks.classList.remove("open")));
   el.langSqBtn.addEventListener("click", () => setLanguage("sq"));
@@ -1878,6 +1940,12 @@ function bindEvents() {
     orderDraft.search = el.orderSearchInput.value;
     renderOrderCatalog();
   });
+  el.orderCategoryBar.addEventListener("click", (event) => {
+    const button = event.target.closest(".order-category-btn");
+    if (!button) return;
+    orderDraft.category = button.dataset.category || "all";
+    renderOrderCatalog();
+  });
   el.orderCatalog.addEventListener("click", (event) => {
     const button = event.target.closest(".add-order-item");
     if (!button) return;
@@ -1909,21 +1977,7 @@ function bindEvents() {
   }));
   el.logoutBtn.addEventListener("click", async () => {
     if (!STAFF_TOOLS_ENABLED) return;
-    if (backendAvailable === false) {
-      clearAuthenticatedState();
-      renderAll();
-      return;
-    }
-    try {
-      await apiRequest("/api/auth/logout", {
-        method: "POST",
-        suppressAuthReset: true
-      });
-    } catch {
-      // Ignore logout transport errors and clear the local session state anyway.
-    }
-    clearAuthenticatedState();
-    renderAll();
+    await performLogout({ render: true, notify: false });
   });
   el.manageBtn.addEventListener("click", () => {
     if (!STAFF_TOOLS_ENABLED) return;

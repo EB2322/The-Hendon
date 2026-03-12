@@ -686,6 +686,30 @@ iframe {
   margin-top: 0.65rem;
 }
 
+.order-category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.order-category-btn {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #121212;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.order-category-btn.active {
+  background: rgba(212, 138, 44, 0.18);
+  border-color: rgba(212, 138, 44, 0.6);
+  color: var(--text);
+}
+
 .catalog-group {
   border: 1px solid var(--line);
   border-radius: 12px;
@@ -1043,6 +1067,12 @@ iframe {
   .catalog-row,
   .cart-row {
     grid-template-columns: 1fr;
+  }
+
+  .order-category-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.2rem;
   }
 
   .user-add {

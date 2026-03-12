@@ -992,7 +992,7 @@ function hasRole(role) {
 }
 
 function canCreateOrders() {
-  return hasRole("waiter") || hasRole("admin");
+  return hasRole("waiter");
 }
 
 function canViewStation(station) {

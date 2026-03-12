@@ -247,7 +247,7 @@ class HendonHandler(SimpleHTTPRequestHandler):
                     return
 
                 if path == "/api/invoices" and method == "POST":
-                    user = self.require_role(connection, {"waiter", "admin"})
+                    user = self.require_role(connection, {"waiter"})
                     if not user:
                         return
                     payload = self.read_json()

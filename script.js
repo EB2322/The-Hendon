@@ -609,6 +609,7 @@ let currentLanguage = load(STORAGE_KEYS.language, "sq") === "en" ? "en" : "sq";
 let menuFilter = "all";
 let orderDraft = createEmptyOrderDraft();
 let syncTimer = null;
+let backendAvailable = null;
 
 const el = {
   metaDescription: document.querySelector('meta[name="description"]'),
@@ -811,13 +812,41 @@ function clearSyncTimer() {
   }
 }
 
+function initializeLocalState() {
+  siteData = normalizeSiteData(load(STORAGE_KEYS.data, null) || load(STORAGE_KEYS.legacyData, DEFAULT_DATA));
+  users = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS));
+  invoices = normalizeInvoices(load(STORAGE_KEYS.invoices, []));
+  session = normalizeSession(load(STORAGE_KEYS.session, null));
+}
+
+function persistUsers() {
+  const storableUsers = normalizeUsers(users);
+  save(STORAGE_KEYS.users, storableUsers);
+  users = storableUsers.map((user) => ({ username: user.username, role: user.role }));
+}
+
+function persistSession() {
+  if (session) {
+    save(STORAGE_KEYS.session, session);
+  } else {
+    localStorage.removeItem(STORAGE_KEYS.session);
+  }
+}
+
 function clearAuthenticatedState() {
   session = null;
   users = [];
   invoices = [];
   orderDraft = createEmptyOrderDraft();
   clearSyncTimer();
+  if (backendAvailable === false) {
+    persistSession();
+  }
   if (el.controlPanel) el.controlPanel.hidden = true;
+}
+
+function isBackendFallbackError(error) {
+  return error && (error.code === "BACKEND_UNAVAILABLE" || error.code === "NETWORK_UNAVAILABLE");
 }
 
 async function apiRequest(path, options = {}) {
@@ -835,7 +864,9 @@ async function apiRequest(path, options = {}) {
   try {
     response = await fetch(path, requestOptions);
   } catch {
-    throw new Error("Nuk u lidh me serverin.");
+    const error = new Error("Nuk u lidh me serverin.");
+    error.code = "NETWORK_UNAVAILABLE";
+    throw error;
   }
   let payload = {};
   const responseText = await response.text();
@@ -851,7 +882,9 @@ async function apiRequest(path, options = {}) {
       clearAuthenticatedState();
       renderAll();
     }
-    throw new Error(payload.error || `Request failed (${response.status}).`);
+    const error = new Error(payload.error || `Request failed (${response.status}).`);
+    error.code = response.status === 404 || response.status === 405 || response.status === 501 ? "BACKEND_UNAVAILABLE" : `HTTP_${response.status}`;
+    throw error;
   }
   return payload;
 }
@@ -892,19 +925,35 @@ function renderOperationalPanels() {
 
 async function refreshBootstrap(options = {}) {
   const { render = true, preserveDraft = true } = options;
-  const payload = await apiRequest("/api/bootstrap", { suppressAuthReset: true });
-  applyBootstrap(payload, { preserveDraft });
-  updateSyncTimer();
-  if (render) renderAll();
+  try {
+    const payload = await apiRequest("/api/bootstrap", { suppressAuthReset: true });
+    backendAvailable = true;
+    applyBootstrap(payload, { preserveDraft });
+    updateSyncTimer();
+    if (render) renderAll();
+  } catch (error) {
+    if (!isBackendFallbackError(error)) throw error;
+    backendAvailable = false;
+    initializeLocalState();
+    clearSyncTimer();
+    if (render) renderAll();
+  }
 }
 
 async function refreshInvoicesFromServer() {
-  if (!session) return;
+  if (!session || backendAvailable === false) return;
   try {
     const payload = await apiRequest("/api/invoices");
+    backendAvailable = true;
     invoices = normalizeInvoices(payload.invoices || []);
     renderOperationalPanels();
   } catch (error) {
+    if (isBackendFallbackError(error)) {
+      backendAvailable = false;
+      initializeLocalState();
+      renderOperationalPanels();
+      return;
+    }
     if (error.message !== tr("sessionLoggedOut")) {
       console.error(error);
     }
@@ -913,20 +962,29 @@ async function refreshInvoicesFromServer() {
 
 async function saveSiteDataToServer(successKey) {
   siteData = normalizeSiteData(siteData);
+  if (backendAvailable === false) {
+    save(STORAGE_KEYS.data, siteData);
+    renderAll();
+    if (successKey) alert(tr(successKey));
+    return;
+  }
   await apiRequest("/api/site-data", {
     method: "PUT",
     body: { siteData }
   });
+  backendAvailable = true;
   await refreshBootstrap({ render: true, preserveDraft: true });
   if (successKey) alert(tr(successKey));
 }
 
 function persistSite() {
   siteData = normalizeSiteData(siteData);
+  if (backendAvailable === false) save(STORAGE_KEYS.data, siteData);
 }
 
 function persistInvoices() {
   invoices = normalizeInvoices(invoices);
+  if (backendAvailable === false) save(STORAGE_KEYS.invoices, invoices);
 }
 
 function hasRole(role) {
@@ -1455,6 +1513,12 @@ function renderUsers() {
   el.usersList.innerHTML = users.map((user) => `<div class="user-row"><span>${escapeHtml(user.username)} (${escapeHtml(getRoleLabel(user.role))})</span><button class="btn btn-ghost btn-small delete-user" data-username="${escapeAttr(user.username)}" ${user.username === "admin" ? "disabled" : ""}>${escapeHtml(tr("deleteUserLabel"))}</button></div>`).join("");
   document.querySelectorAll(".delete-user").forEach((button) => button.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
+    if (backendAvailable === false) {
+      users = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS)).filter((user) => user.username !== button.dataset.username);
+      persistUsers();
+      renderAll();
+      return;
+    }
     try {
       await apiRequest(`/api/users/${encodeURIComponent(button.dataset.username)}`, {
         method: "DELETE"
@@ -1545,6 +1609,31 @@ async function submitCurrentOrder() {
     alert(tr("orderNeedsItems"));
     return;
   }
+  if (backendAvailable === false) {
+    const createdAt = new Date();
+    const number = buildInvoiceNumber(createdAt);
+    const items = orderDraft.items.map((item, idx) => normalizeInvoiceItem({
+      ...item,
+      id: `${number}-L${idx + 1}`
+    }, idx));
+    invoices.unshift({
+      id: `${number}-${createdAt.getTime()}`,
+      number,
+      createdAt: createdAt.toISOString(),
+      waiter: session ? session.username : "staff",
+      table: orderDraft.table.trim(),
+      customer: orderDraft.customer.trim(),
+      note: orderDraft.note.trim(),
+      items,
+      total: items.reduce((sum, item) => sum + item.totalPrice, 0),
+      stationStatus: buildStationStatus(items)
+    });
+    persistInvoices();
+    orderDraft = createEmptyOrderDraft();
+    renderAll();
+    alert(tr("orderSubmitted"));
+    return;
+  }
   try {
     await apiRequest("/api/invoices", {
       method: "POST",
@@ -1565,6 +1654,21 @@ async function submitCurrentOrder() {
 
 async function markStationReady(invoiceId, station) {
   if (!canViewStation(station)) return;
+  if (backendAvailable === false) {
+    invoices = invoices.map((invoice) => {
+      if (invoice.id !== invoiceId) return invoice;
+      return {
+        ...invoice,
+        stationStatus: {
+          ...invoice.stationStatus,
+          [station]: invoice.stationStatus[station] === "na" ? "na" : "ready"
+        }
+      };
+    });
+    persistInvoices();
+    renderAll();
+    return;
+  }
   try {
     await apiRequest(`/api/invoices/${encodeURIComponent(invoiceId)}/stations/${encodeURIComponent(station)}/ready`, {
       method: "POST"
@@ -1679,6 +1783,24 @@ function fileToDataUrl(file) {
 
 async function handleLoginSubmit() {
   if (!STAFF_TOOLS_ENABLED) return;
+  if (backendAvailable === false) {
+    const user = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS)).find((entry) => entry.username === el.loginUsername.value.trim() && entry.password === el.loginPassword.value.trim());
+    if (!user) {
+      el.loginError.textContent = tr("invalidCredentials");
+      return;
+    }
+    initializeLocalState();
+    session = { username: user.username, role: user.role };
+    persistSession();
+    users = normalizeUserSummaries(load(STORAGE_KEYS.users, DEFAULT_USERS));
+    orderDraft = createEmptyOrderDraft();
+    el.loginUsername.value = "";
+    el.loginPassword.value = "";
+    el.loginError.textContent = "";
+    el.loginModal.hidden = true;
+    renderAll();
+    return;
+  }
   try {
     const payload = await apiRequest("/api/auth/login", {
       method: "POST",
@@ -1773,6 +1895,11 @@ function bindEvents() {
   }));
   el.logoutBtn.addEventListener("click", async () => {
     if (!STAFF_TOOLS_ENABLED) return;
+    if (backendAvailable === false) {
+      clearAuthenticatedState();
+      renderAll();
+      return;
+    }
     try {
       await apiRequest("/api/auth/logout", {
         method: "POST",
@@ -1910,6 +2037,16 @@ function bindEvents() {
       alert(tr("usernameExists"));
       return;
     }
+    if (backendAvailable === false) {
+      const storedUsers = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS));
+      storedUsers.push({ username, password, role: el.newRole.value });
+      users = storedUsers;
+      persistUsers();
+      el.newUsername.value = "";
+      el.newPassword.value = "";
+      renderAll();
+      return;
+    }
     try {
       await apiRequest("/api/users", {
         method: "POST",
@@ -1927,6 +2064,15 @@ function bindEvents() {
     const newPassword = el.selfNewPassword.value.trim();
     if (!newPassword) {
       alert(tr("newPasswordRequired"));
+      return;
+    }
+    if (backendAvailable === false) {
+      const storedUsers = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS)).map((user) => user.username === session.username ? { ...user, password: newPassword } : user);
+      users = storedUsers;
+      persistUsers();
+      el.selfNewPassword.value = "";
+      renderAll();
+      alert(tr("selfPasswordChanged"));
       return;
     }
     try {
@@ -1947,6 +2093,14 @@ function bindEvents() {
     const newPassword = el.targetNewPassword.value.trim();
     if (!target || !newPassword) {
       alert(tr("chooseUserAndPassword"));
+      return;
+    }
+    if (backendAvailable === false) {
+      const storedUsers = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS)).map((user) => user.username === target ? { ...user, password: newPassword } : user);
+      users = storedUsers;
+      persistUsers();
+      el.targetNewPassword.value = "";
+      renderAll();
       return;
     }
     try {

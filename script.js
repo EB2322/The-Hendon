@@ -3,7 +3,8 @@ const STORAGE_KEYS = {
   legacyData: "hendon_site_data",
   users: "hendon_users",
   session: "hendon_session",
-  language: "hendon_language"
+  language: "hendon_language",
+  invoices: "hendon_invoices_v1"
 };
 
 const GOOGLE_REVIEWS_URL = "https://www.google.com/maps/place/The+Hendon+Pub/@41.3225198,19.7957727,17z/data=!4m8!3m7!1s0x1350310040968bf3:0x3a48075119e30851!8m2!3d41.3223019!4d19.7954807!9m1!1b1!16s%2Fg%2F11xmqhv6hp!17m2!4m1!1e3!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDMwNC4xIKXMDSoASAFQAw%3D%3D";
@@ -18,6 +19,17 @@ const CUSTOM_GALLERY_IMAGES = [
   "https://lh3.googleusercontent.com/gps-cs-s/AHVAweqJMw12MV9aWmJ2VW3daS4eGRo9gVL18c75n25mpBiSb2TuaSmQKFetrYrW106lpTRBcIW8zQtcJ4RWh5V1RVMXYgIZStQwu_k-A_5Fi8aWiuXTd_4pHa5vopZ9Vlq95qYFWWrK1rbFHU4_=w203-h360-k-no"
 ];
 
+const ROLE_KEYS = ["admin", "waiter", "bar", "kitchen"];
+const STATION_BY_TYPE = {
+  food: "kitchen",
+  drink: "bar"
+};
+const NON_ORDERABLE_SECTIONS = ["LEGJENDA E FORCES", "STRENGTH GUIDE"];
+const LOCAL_STAFF_HOSTS = new Set(["", "localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]"]);
+const CURRENT_HOSTNAME = window.location.hostname.toLowerCase();
+// Public static hosting cannot safely protect client-side staff tools.
+const STAFF_TOOLS_ENABLED = window.location.protocol === "file:" || LOCAL_STAFF_HOSTS.has(CURRENT_HOSTNAME);
+
 const UI = {
   sq: {
     navAbout: "Rreth Nesh", navMenu: "Menu", navGallery: "Galeri", navContact: "Kontakt",
@@ -26,8 +38,8 @@ const UI = {
     menuTag: "Menu", filterAll: "Te Gjitha", filterFood: "Ushqim", filterDrink: "Pije",
     galleryTag: "Galeri", galleryTitle: "Atmosfera", reviewsTag: "Vleresime", reviewsTitle: "Cfare Thone Klientet",
     reviewsLink: "Shiko te gjitha ne Google", contactTag: "Kontakt",
-    footerRights: "Te gjitha te drejtat e rezervuara.", panelTitle: "Paneli i Menaxhimit", panelClose: "Mbyll",
-    editorLanguage: "Po editon gjuhen: Shqip", menuEditorTitle: "Menu Editor (admin + user)", saveMenu: "Ruaj Menune", addItem: "Shto Artikull",
+    footerRights: "Te gjitha te drejtat e rezervuara.", panelTitle: "Paneli i Stafit", panelClose: "Mbyll",
+    editorLanguage: "Po editon gjuhen: Shqip", menuEditorTitle: "Menu Editor (vetem admin)", saveMenu: "Ruaj Menune", addItem: "Shto Artikull",
     generalEditorTitle: "General Editor (vetem admin)", labelBusinessName: "Emri i biznesit", labelHeroKicker: "Hero kicker", labelHeroTitle: "Hero title",
     labelHeroText: "Hero text", labelAboutTitle: "About title", labelAboutText: "About text", labelMenuTitle: "Menu title", labelHours: "Orari",
     labelAddress: "Adresa", labelContactTitle: "Kontakt title", labelContactText: "Kontakt text", labelPhone: "Telefon", labelMapsUrl: "Link Google Maps",
@@ -39,9 +51,9 @@ const UI = {
     reviewsEditorTitle: "Reviews Editor (vetem admin)", saveReviews: "Ruaj Reviews", addReview: "Shto Review",
     usersTitle: "Users (vetem admin)", addUser: "Shto User", passwordManagerTitle: "Password Manager (vetem admin)",
     labelOwnPassword: "Ndrysho password-in tend", changePassword: "Ndrysho", labelOtherPassword: "Ndrysho password per user tjeter", savePassword: "Ruaj",
-    userRole: "user", adminRole: "admin", newPasswordPlaceholder: "password i ri",
+    waiterRole: "kamarier", barRole: "banakier", kitchenRole: "kuzhine", adminRole: "admin", newPasswordPlaceholder: "password i ri",
     loginTitle: "Hyr", username: "Username", password: "Password", loginSubmit: "Hyr", cancel: "Anulo",
-    invalidCredentials: "Kredencialet nuk jane te sakta.", sessionLoggedOut: "Nuk je i loguar.",
+    invalidCredentials: "Kredencialet nuk jane te sakta.", sessionLoggedOut: "Nuk je i loguar.", publicSiteMode: "Faqja publike eshte vetem per klientet. Menaxhimi eshte aktiv vetem lokalisht.",
     menuEmptyTitle: "Menu bosh", menuEmptyText: "Nuk ka artikuj per kete filter.",
     legendNa: "Jeshile: Jo alkolike", legendLight: "E verdhe: Te lehta", legendStrong: "E kuqe: Te forta",
     badgeNa: "Jo alkolike", badgeLight: "E lehte", badgeStrong: "E forte", galleryAlt: "Foto e ambientit", askWaiter: "Pyet kamarierin",
@@ -49,7 +61,20 @@ const UI = {
     jsonSaved: "JSON u ruajt me sukses.", jsonInvalid: "JSON nuk eshte valid.", validUrls: "Vendos URL valide, nje per rresht.",
     fillUsernamePassword: "Ploteso username dhe password.", usernameExists: "Ky username ekziston.",
     newPasswordRequired: "Vendos password-in e ri.", chooseUserAndPassword: "Zgjidh user dhe vendos password-in e ri.",
-    selfPasswordChanged: "Password-i yt u ndryshua."
+    selfPasswordChanged: "Password-i yt u ndryshua.",
+    orderPanelTitle: "Porosite e Kamarierit", orderPanelHelp: "Krijo faturen dhe sistemi e dergon automatikisht te banaku ose kuzhina sipas artikujve.",
+    orderTablePlaceholder: "Tavolina", orderCustomerPlaceholder: "Klienti", orderNoteLabel: "Shenime per porosine",
+    orderNotePlaceholder: "Pa qepe, me pak akull...", orderSearchLabel: "Kerko ne menu", orderSearchPlaceholder: "Kafe, negroni, burger...",
+    addToOrder: "Shto", orderTotal: "Totali", submitOrder: "Dergo Faturen", clearOrder: "Pastro", waiterHistoryTitle: "Faturat e mia",
+    emptyOrder: "Nuk ke shtuar ende artikuj ne fature.", emptyWaiterOrders: "Nuk ka ende fatura nga ky profil.", orderNeedsItems: "Shto te pakten nje artikull ne porosi.",
+    orderSubmitted: "Fatura u dergua me sukses.", orderTableLabel: "Tavolina", orderCustomerLabel: "Klienti", orderCreated: "Krijuar", orderStatus: "Statusi",
+    barBoardTitle: "Banaku", barBoardHelp: "Ketu shfaqen faturat me pije qe presin te pergatiten.", kitchenBoardTitle: "Kuzhina",
+    kitchenBoardHelp: "Ketu shfaqen faturat me ushqim qe presin te pergatiten.", emptyBarBoard: "Nuk ka pije ne pritje.", emptyKitchenBoard: "Nuk ka ushqime ne pritje.",
+    markReady: "Sheno gati", readyLabel: "Gati", pendingLabel: "Ne pritje", partialLabel: "Pjeserisht gati", naLabel: "Pa artikuj",
+    stationBar: "Banak", stationKitchen: "Kuzhine", analyticsTitle: "Xhiro dhe Historik", dailyRevenue: "Xhiro ditore",
+    weeklyRevenue: "Xhiro javore", monthlyRevenue: "Xhiro mujore", invoiceHistoryTitle: "Historiku i faturave", noInvoices: "Nuk ka ende fatura te regjistruara.",
+    invoiceNumber: "Fatura", invoiceItems: "Artikuj", lineTotal: "Totali i rreshtit", deleteUserLabel: "Fshi", noMenuMatches: "Nuk u gjet asnje artikull ne menu.",
+    priceLabel: "Cmimi", quantityLabel: "Sasia", myRoleLabel: "Roli", untitledCustomer: "Pa emer"
   },
   en: {
     navAbout: "About", navMenu: "Menu", navGallery: "Gallery", navContact: "Contact",
@@ -58,8 +83,8 @@ const UI = {
     menuTag: "Menu", filterAll: "All", filterFood: "Food", filterDrink: "Drinks",
     galleryTag: "Gallery", galleryTitle: "Atmosphere", reviewsTag: "Reviews", reviewsTitle: "What Guests Say",
     reviewsLink: "See all on Google", contactTag: "Contact",
-    footerRights: "All rights reserved.", panelTitle: "Management Panel", panelClose: "Close",
-    editorLanguage: "Editing language: English", menuEditorTitle: "Menu Editor (admin + user)", saveMenu: "Save Menu", addItem: "Add Item",
+    footerRights: "All rights reserved.", panelTitle: "Staff Panel", panelClose: "Close",
+    editorLanguage: "Editing language: English", menuEditorTitle: "Menu Editor (admin only)", saveMenu: "Save Menu", addItem: "Add Item",
     generalEditorTitle: "General Editor (admin only)", labelBusinessName: "Business name", labelHeroKicker: "Hero kicker", labelHeroTitle: "Hero title",
     labelHeroText: "Hero text", labelAboutTitle: "About title", labelAboutText: "About text", labelMenuTitle: "Menu title", labelHours: "Opening hours",
     labelAddress: "Address", labelContactTitle: "Contact title", labelContactText: "Contact text", labelPhone: "Phone", labelMapsUrl: "Google Maps link",
@@ -71,9 +96,9 @@ const UI = {
     reviewsEditorTitle: "Reviews Editor (admin only)", saveReviews: "Save Reviews", addReview: "Add Review",
     usersTitle: "Users (admin only)", addUser: "Add User", passwordManagerTitle: "Password Manager (admin only)",
     labelOwnPassword: "Change your password", changePassword: "Change", labelOtherPassword: "Change another user's password", savePassword: "Save",
-    userRole: "user", adminRole: "admin", newPasswordPlaceholder: "new password",
+    waiterRole: "waiter", barRole: "bartender", kitchenRole: "kitchen", adminRole: "admin", newPasswordPlaceholder: "new password",
     loginTitle: "Login", username: "Username", password: "Password", loginSubmit: "Login", cancel: "Cancel",
-    invalidCredentials: "The credentials are not correct.", sessionLoggedOut: "You are not logged in.",
+    invalidCredentials: "The credentials are not correct.", sessionLoggedOut: "You are not logged in.", publicSiteMode: "The public site is customer-facing only. Staff management is available locally.",
     menuEmptyTitle: "Empty menu", menuEmptyText: "There are no items for this filter.",
     legendNa: "Green: Non-alcoholic", legendLight: "Yellow: Light", legendStrong: "Red: Strong",
     badgeNa: "Non-alcoholic", badgeLight: "Light", badgeStrong: "Strong", galleryAlt: "Venue photo", askWaiter: "Ask the waiter",
@@ -81,13 +106,28 @@ const UI = {
     jsonSaved: "JSON saved successfully.", jsonInvalid: "The JSON is not valid.", validUrls: "Enter valid URLs, one per line.",
     fillUsernamePassword: "Enter both username and password.", usernameExists: "This username already exists.",
     newPasswordRequired: "Enter the new password.", chooseUserAndPassword: "Choose a user and enter the new password.",
-    selfPasswordChanged: "Your password was changed."
+    selfPasswordChanged: "Your password was changed.",
+    orderPanelTitle: "Waiter Orders", orderPanelHelp: "Create the invoice and the system routes it automatically to the bar or kitchen based on the items.",
+    orderTablePlaceholder: "Table", orderCustomerPlaceholder: "Customer", orderNoteLabel: "Order notes",
+    orderNotePlaceholder: "No onions, less ice...", orderSearchLabel: "Search the menu", orderSearchPlaceholder: "Coffee, negroni, burger...",
+    addToOrder: "Add", orderTotal: "Total", submitOrder: "Send Invoice", clearOrder: "Clear", waiterHistoryTitle: "My invoices",
+    emptyOrder: "No items have been added yet.", emptyWaiterOrders: "There are no invoices for this staff account yet.", orderNeedsItems: "Add at least one item to the order.",
+    orderSubmitted: "Invoice sent successfully.", orderTableLabel: "Table", orderCustomerLabel: "Customer", orderCreated: "Created", orderStatus: "Status",
+    barBoardTitle: "Bar", barBoardHelp: "Here you can see the drink tickets waiting to be prepared.", kitchenBoardTitle: "Kitchen",
+    kitchenBoardHelp: "Here you can see the food tickets waiting to be prepared.", emptyBarBoard: "No drink tickets are waiting.", emptyKitchenBoard: "No food tickets are waiting.",
+    markReady: "Mark Ready", readyLabel: "Ready", pendingLabel: "Pending", partialLabel: "Partially ready", naLabel: "No items",
+    stationBar: "Bar", stationKitchen: "Kitchen", analyticsTitle: "Revenue and History", dailyRevenue: "Daily revenue",
+    weeklyRevenue: "Weekly revenue", monthlyRevenue: "Monthly revenue", invoiceHistoryTitle: "Invoice history", noInvoices: "No invoices have been recorded yet.",
+    invoiceNumber: "Invoice", invoiceItems: "Items", lineTotal: "Line total", deleteUserLabel: "Delete", noMenuMatches: "No menu items matched your search.",
+    priceLabel: "Price", quantityLabel: "Qty", myRoleLabel: "Role", untitledCustomer: "Walk-in"
   }
 };
 
 const DEFAULT_USERS = [
   { username: "admin", password: "admin123", role: "admin" },
-  { username: "user", password: "user123", role: "user" }
+  { username: "kamarier", password: "kamarier123", role: "waiter" },
+  { username: "banak", password: "banak123", role: "bar" },
+  { username: "kuzhine", password: "kuzhine123", role: "kitchen" }
 ];
 
 const DEFAULT_CONTENT = {
@@ -395,9 +435,126 @@ function normalizeReviews(reviews) {
     .filter((review) => review.text.sq || review.text.en);
 }
 
+function normalizeRole(role) {
+  const value = String(role || "").trim().toLowerCase();
+  if (value === "user") return "waiter";
+  if (value === "bartender" || value === "banakier") return "bar";
+  if (value === "chef" || value === "cook" || value === "kuzhine") return "kitchen";
+  return ROLE_KEYS.includes(value) ? value : "waiter";
+}
+
+function extractPriceValue(price) {
+  const text = String(price || "");
+  if (text.includes("%")) return 0;
+  const match = text.match(/\d+(?:[.,]\d+)?/);
+  if (!match) return 0;
+  const parsed = Number(match[0].replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function isOrderableMenuItem(item) {
+  const sectionSq = String((item.section && item.section.sq) || "").toUpperCase();
+  const sectionEn = String((item.section && item.section.en) || "").toUpperCase();
+  return !NON_ORDERABLE_SECTIONS.some((section) => sectionSq.includes(section) || sectionEn.includes(section));
+}
+
+function getItemStation(item) {
+  return STATION_BY_TYPE[item.type] || "kitchen";
+}
+
+function normalizeInvoiceItem(item, idx = 0) {
+  const qty = Math.max(1, Number(item.qty) || 1);
+  const unitPrice = Number(item.unitPrice);
+  const safeUnitPrice = Number.isFinite(unitPrice) ? unitPrice : extractPriceValue(item.priceLabel || item.price);
+  const nameSq = String((item.name && item.name.sq) || item.nameSq || item.name || `Artikull ${idx + 1}`);
+  const nameEn = String((item.name && item.name.en) || item.nameEn || translateMenuName(nameSq) || nameSq);
+  const sectionSq = String((item.section && item.section.sq) || item.sectionSq || item.section || "Te tjera");
+  const sectionEn = String((item.section && item.section.en) || item.sectionEn || translateMenuSection(sectionSq) || sectionSq);
+  const type = item.type === "drink" ? "drink" : "food";
+  return {
+    id: String(item.id || `li-${Date.now()}-${idx}`),
+    menuId: String(item.menuId || item.id || ""),
+    type,
+    station: item.station === "bar" || item.station === "kitchen" ? item.station : getItemStation({ type }),
+    name: { sq: nameSq, en: nameEn },
+    section: { sq: sectionSq, en: sectionEn },
+    qty,
+    unitPrice: safeUnitPrice,
+    priceLabel: String(item.priceLabel || item.price || `${safeUnitPrice} ALL`),
+    totalPrice: Math.round(qty * safeUnitPrice)
+  };
+}
+
+function buildStationStatus(items, rawStatus = {}) {
+  const status = {};
+  ["bar", "kitchen"].forEach((station) => {
+    const hasItems = items.some((item) => item.station === station);
+    if (!hasItems) {
+      status[station] = "na";
+      return;
+    }
+    status[station] = rawStatus[station] === "ready" ? "ready" : "pending";
+  });
+  return status;
+}
+
 function normalizeUsers(raw) {
-  if (!Array.isArray(raw) || raw.length === 0) return DEFAULT_USERS;
-  return raw.filter((user) => user && user.username && user.password && user.role);
+  if (!Array.isArray(raw) || raw.length === 0) return [...DEFAULT_USERS];
+  const seen = new Set();
+  const normalized = raw
+    .filter((user) => user && user.username && user.password)
+    .map((user) => ({
+      username: String(user.username).trim(),
+      password: String(user.password),
+      role: normalizeRole(user.role)
+    }))
+    .filter((user) => user.username && !seen.has(user.username) && (seen.add(user.username), true));
+  DEFAULT_USERS.forEach((user) => {
+    if (!normalized.some((entry) => entry.username === user.username)) normalized.push({ ...user });
+  });
+  if (!normalized.some((user) => user.role === "admin")) normalized.unshift({ ...DEFAULT_USERS[0] });
+  return normalized.length ? normalized : [...DEFAULT_USERS];
+}
+
+function normalizeSession(raw) {
+  if (!STAFF_TOOLS_ENABLED || !raw || !raw.username) return null;
+  return {
+    username: String(raw.username),
+    role: normalizeRole(raw.role)
+  };
+}
+
+function normalizeInvoices(raw) {
+  return (Array.isArray(raw) ? raw : [])
+    .map((invoice, idx) => {
+      const items = (Array.isArray(invoice.items) ? invoice.items : []).map(normalizeInvoiceItem);
+      const createdDate = new Date(invoice.createdAt || invoice.created_at || Date.now());
+      const createdAt = Number.isNaN(createdDate.getTime()) ? new Date().toISOString() : createdDate.toISOString();
+      const stationStatus = buildStationStatus(items, invoice.stationStatus || invoice.station_status || {});
+      return {
+        id: String(invoice.id || `INV-${idx + 1}`),
+        number: String(invoice.number || invoice.id || `INV-${idx + 1}`),
+        createdAt,
+        waiter: String(invoice.waiter || invoice.username || "staff"),
+        table: String(invoice.table || ""),
+        customer: String(invoice.customer || ""),
+        note: String(invoice.note || ""),
+        items,
+        total: items.reduce((sum, item) => sum + item.totalPrice, 0),
+        stationStatus
+      };
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+function createEmptyOrderDraft() {
+  return {
+    table: "",
+    customer: "",
+    note: "",
+    search: "",
+    items: []
+  };
 }
 
 function normalizeSiteData(raw) {
@@ -436,9 +593,15 @@ function normalizeSiteData(raw) {
 
 let siteData = normalizeSiteData(load(STORAGE_KEYS.data, null) || load(STORAGE_KEYS.legacyData, DEFAULT_DATA));
 let users = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS));
-let session = load(STORAGE_KEYS.session, null);
+let invoices = normalizeInvoices(load(STORAGE_KEYS.invoices, []));
+let session = normalizeSession(load(STORAGE_KEYS.session, null));
 let currentLanguage = load(STORAGE_KEYS.language, "sq") === "en" ? "en" : "sq";
 let menuFilter = "all";
+let orderDraft = createEmptyOrderDraft();
+
+if (!STAFF_TOOLS_ENABLED) {
+  localStorage.removeItem(STORAGE_KEYS.session);
+}
 
 const el = {
   metaDescription: document.querySelector('meta[name="description"]'),
@@ -498,6 +661,42 @@ const el = {
   panelTitle: document.getElementById("panelTitle"),
   panelClose: document.getElementById("panelClose"),
   editorLanguageInfo: document.getElementById("editorLanguageInfo"),
+  orderBlock: document.getElementById("orderBlock"),
+  orderPanelTitle: document.getElementById("orderPanelTitle"),
+  orderPanelHelp: document.getElementById("orderPanelHelp"),
+  orderTableInput: document.getElementById("orderTableInput"),
+  orderCustomerInput: document.getElementById("orderCustomerInput"),
+  orderNoteLabel: document.getElementById("orderNoteLabel"),
+  orderNoteInput: document.getElementById("orderNoteInput"),
+  orderSearchLabel: document.getElementById("orderSearchLabel"),
+  orderSearchInput: document.getElementById("orderSearchInput"),
+  orderCatalog: document.getElementById("orderCatalog"),
+  orderCart: document.getElementById("orderCart"),
+  orderTotalLabel: document.getElementById("orderTotalLabel"),
+  orderTotalValue: document.getElementById("orderTotalValue"),
+  submitOrderBtn: document.getElementById("submitOrderBtn"),
+  clearOrderBtn: document.getElementById("clearOrderBtn"),
+  waiterHistoryTitle: document.getElementById("waiterHistoryTitle"),
+  waiterOrders: document.getElementById("waiterOrders"),
+  barBoardBlock: document.getElementById("barBoardBlock"),
+  barBoardTitle: document.getElementById("barBoardTitle"),
+  barBoardHelp: document.getElementById("barBoardHelp"),
+  barBoard: document.getElementById("barBoard"),
+  kitchenBoardBlock: document.getElementById("kitchenBoardBlock"),
+  kitchenBoardTitle: document.getElementById("kitchenBoardTitle"),
+  kitchenBoardHelp: document.getElementById("kitchenBoardHelp"),
+  kitchenBoard: document.getElementById("kitchenBoard"),
+  analyticsBlock: document.getElementById("analyticsBlock"),
+  analyticsTitle: document.getElementById("analyticsTitle"),
+  dailyRevenueLabel: document.getElementById("dailyRevenueLabel"),
+  dailyRevenueValue: document.getElementById("dailyRevenueValue"),
+  weeklyRevenueLabel: document.getElementById("weeklyRevenueLabel"),
+  weeklyRevenueValue: document.getElementById("weeklyRevenueValue"),
+  monthlyRevenueLabel: document.getElementById("monthlyRevenueLabel"),
+  monthlyRevenueValue: document.getElementById("monthlyRevenueValue"),
+  invoiceHistoryTitle: document.getElementById("invoiceHistoryTitle"),
+  invoiceHistory: document.getElementById("invoiceHistory"),
+  menuEditorBlock: document.getElementById("menuEditorBlock"),
   menuEditorTitle: document.getElementById("menuEditorTitle"),
   menuEditor: document.getElementById("menuEditor"),
   saveMenuBtn: document.getElementById("saveMenuBtn"),
@@ -603,8 +802,104 @@ function persistSite() {
   save(STORAGE_KEYS.data, siteData);
 }
 
+function persistInvoices() {
+  invoices = normalizeInvoices(invoices);
+  save(STORAGE_KEYS.invoices, invoices);
+}
+
 function hasRole(role) {
-  return !!session && session.role === role;
+  return STAFF_TOOLS_ENABLED && !!session && session.role === role;
+}
+
+function canCreateOrders() {
+  return hasRole("waiter") || hasRole("admin");
+}
+
+function canViewStation(station) {
+  return hasRole("admin") || (station === "bar" && hasRole("bar")) || (station === "kitchen" && hasRole("kitchen"));
+}
+
+function getRoleLabel(role) {
+  const normalized = normalizeRole(role);
+  const keyMap = {
+    waiter: "waiterRole",
+    bar: "barRole",
+    kitchen: "kitchenRole",
+    admin: "adminRole"
+  };
+  return tr(keyMap[normalized] || "waiterRole");
+}
+
+function formatCurrency(value) {
+  const amount = Math.round(Number(value) || 0);
+  return `${amount.toLocaleString(currentLanguage === "sq" ? "sq-AL" : "en-US")} ALL`;
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  const locale = currentLanguage === "sq" ? "sq-AL" : "en-US";
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "short",
+    timeStyle: "short"
+  }).format(date);
+}
+
+function getInvoiceProgress(invoice) {
+  const states = Object.values(invoice.stationStatus || {}).filter((value) => value !== "na");
+  if (!states.length) return "na";
+  if (states.every((value) => value === "ready")) return "ready";
+  if (states.some((value) => value === "ready")) return "partial";
+  return "pending";
+}
+
+function getStatusLabel(status) {
+  if (status === "ready") return tr("readyLabel");
+  if (status === "partial") return tr("partialLabel");
+  if (status === "na") return tr("naLabel");
+  return tr("pendingLabel");
+}
+
+function getDayBounds(date = new Date()) {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start, end };
+}
+
+function getWeekBounds(date = new Date()) {
+  const start = new Date(date);
+  start.setHours(0, 0, 0, 0);
+  const day = start.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  start.setDate(start.getDate() + diff);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 7);
+  return { start, end };
+}
+
+function getMonthBounds(date = new Date()) {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+  return { start, end };
+}
+
+function calculateRevenueForRange(start, end) {
+  return invoices
+    .filter((invoice) => {
+      const timestamp = new Date(invoice.createdAt).getTime();
+      return timestamp >= start.getTime() && timestamp < end.getTime();
+    })
+    .reduce((sum, invoice) => sum + invoice.total, 0);
+}
+
+function buildInvoiceNumber(date = new Date()) {
+  const sameDayCount = invoices.filter((invoice) => {
+    const current = new Date(invoice.createdAt);
+    return current.getFullYear() === date.getFullYear() && current.getMonth() === date.getMonth() && current.getDate() === date.getDate();
+  }).length + 1;
+  const prefix = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
+  return `INV-${prefix}-${String(sameDayCount).padStart(3, "0")}`;
 }
 
 function setLanguage(language) {
@@ -645,6 +940,27 @@ function renderChrome() {
   el.panelTitle.textContent = tr("panelTitle");
   el.panelClose.textContent = tr("panelClose");
   el.editorLanguageInfo.textContent = tr("editorLanguage");
+  el.orderPanelTitle.textContent = tr("orderPanelTitle");
+  el.orderPanelHelp.textContent = tr("orderPanelHelp");
+  el.orderTableInput.placeholder = tr("orderTablePlaceholder");
+  el.orderCustomerInput.placeholder = tr("orderCustomerPlaceholder");
+  el.orderNoteLabel.textContent = tr("orderNoteLabel");
+  el.orderNoteInput.placeholder = tr("orderNotePlaceholder");
+  el.orderSearchLabel.textContent = tr("orderSearchLabel");
+  el.orderSearchInput.placeholder = tr("orderSearchPlaceholder");
+  el.orderTotalLabel.textContent = tr("orderTotal");
+  el.submitOrderBtn.textContent = tr("submitOrder");
+  el.clearOrderBtn.textContent = tr("clearOrder");
+  el.waiterHistoryTitle.textContent = tr("waiterHistoryTitle");
+  el.barBoardTitle.textContent = tr("barBoardTitle");
+  el.barBoardHelp.textContent = tr("barBoardHelp");
+  el.kitchenBoardTitle.textContent = tr("kitchenBoardTitle");
+  el.kitchenBoardHelp.textContent = tr("kitchenBoardHelp");
+  el.analyticsTitle.textContent = tr("analyticsTitle");
+  el.dailyRevenueLabel.textContent = tr("dailyRevenue");
+  el.weeklyRevenueLabel.textContent = tr("weeklyRevenue");
+  el.monthlyRevenueLabel.textContent = tr("monthlyRevenue");
+  el.invoiceHistoryTitle.textContent = tr("invoiceHistoryTitle");
   el.menuEditorTitle.textContent = tr("menuEditorTitle");
   el.saveMenuBtn.textContent = tr("saveMenu");
   el.addMenuItemBtn.textContent = tr("addItem");
@@ -695,8 +1011,10 @@ function renderChrome() {
   el.newPassword.placeholder = tr("password");
   el.selfNewPassword.placeholder = tr("newPasswordPlaceholder");
   el.targetNewPassword.placeholder = tr("newPasswordPlaceholder");
-  if (el.newRole.options[0]) el.newRole.options[0].textContent = tr("userRole");
-  if (el.newRole.options[1]) el.newRole.options[1].textContent = tr("adminRole");
+  if (el.newRole.options[0]) el.newRole.options[0].textContent = tr("waiterRole");
+  if (el.newRole.options[1]) el.newRole.options[1].textContent = tr("barRole");
+  if (el.newRole.options[2]) el.newRole.options[2].textContent = tr("kitchenRole");
+  if (el.newRole.options[3]) el.newRole.options[3].textContent = tr("adminRole");
   el.mapEmbed.title = currentLanguage === "sq" ? "Lokacioni ne harte" : "Location on the map";
   el.langSqBtn.classList.toggle("active", currentLanguage === "sq");
   el.langEnBtn.classList.toggle("active", currentLanguage === "en");
@@ -796,9 +1114,192 @@ function renderReviews() {
   }).join("");
 }
 
+function getStationLabel(station) {
+  return station === "bar" ? tr("stationBar") : tr("stationKitchen");
+}
+
+function buildStatusChip(status) {
+  return `<span class="status-chip status-${escapeAttr(status)}">${escapeHtml(getStatusLabel(status))}</span>`;
+}
+
+function buildStationSummary(invoice) {
+  return `
+    <div class="station-inline">
+      <span>${escapeHtml(tr("stationBar"))}</span>
+      ${buildStatusChip(invoice.stationStatus.bar)}
+      <span>${escapeHtml(tr("stationKitchen"))}</span>
+      ${buildStatusChip(invoice.stationStatus.kitchen)}
+    </div>
+  `;
+}
+
+function renderOrderCatalog() {
+  if (!canCreateOrders()) return;
+  el.orderTableInput.value = orderDraft.table;
+  el.orderCustomerInput.value = orderDraft.customer;
+  el.orderNoteInput.value = orderDraft.note;
+  el.orderSearchInput.value = orderDraft.search;
+
+  const query = orderDraft.search.trim().toLowerCase();
+  const items = siteData.menu.filter((item) => {
+    if (!isOrderableMenuItem(item)) return false;
+    if (!query) return true;
+    const haystack = `${item.name.sq} ${item.name.en} ${item.section.sq} ${item.section.en}`.toLowerCase();
+    return haystack.includes(query);
+  });
+
+  if (!items.length) {
+    el.orderCatalog.innerHTML = `<p class="empty-state">${escapeHtml(tr("noMenuMatches"))}</p>`;
+    return;
+  }
+
+  const groups = new Map();
+  items.forEach((item) => {
+    const section = item.section[currentLanguage] || item.section.sq;
+    if (!groups.has(section)) groups.set(section, []);
+    groups.get(section).push(item);
+  });
+
+  el.orderCatalog.innerHTML = [...groups.entries()].map(([section, group]) => `
+    <div class="catalog-group">
+      <h5>${escapeHtml(section)}</h5>
+      ${group.map((item) => `
+        <div class="catalog-row">
+          <div>
+            <p class="catalog-item-name">${escapeHtml(item.name[currentLanguage] || item.name.sq)}</p>
+            <p class="ticket-meta">${escapeHtml(getStationLabel(getItemStation(item)))}</p>
+          </div>
+          <span class="catalog-price">${escapeHtml(localizePrice(item.price))}</span>
+          <button class="btn btn-primary btn-small add-order-item" data-id="${escapeAttr(item.id)}">${escapeHtml(tr("addToOrder"))}</button>
+        </div>
+      `).join("")}
+    </div>
+  `).join("");
+}
+
+function renderOrderCart() {
+  if (!canCreateOrders()) return;
+  if (!orderDraft.items.length) {
+    el.orderCart.innerHTML = `<p class="empty-state">${escapeHtml(tr("emptyOrder"))}</p>`;
+    el.orderTotalValue.textContent = formatCurrency(0);
+    return;
+  }
+  const total = orderDraft.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  el.orderTotalValue.textContent = formatCurrency(total);
+  el.orderCart.innerHTML = orderDraft.items.map((item) => `
+    <div class="cart-row" data-id="${escapeAttr(item.id)}">
+      <div>
+        <p class="cart-item-name">${escapeHtml(item.name[currentLanguage] || item.name.sq)}</p>
+        <p class="ticket-meta">${escapeHtml(getStationLabel(item.station))} | ${escapeHtml(formatCurrency(item.totalPrice))}</p>
+      </div>
+      <div class="cart-controls">
+        <button class="qty-btn update-cart-item" data-id="${escapeAttr(item.id)}" data-action="decrease">-</button>
+        <span class="qty-value">${escapeHtml(item.qty)}</span>
+        <button class="qty-btn update-cart-item" data-id="${escapeAttr(item.id)}" data-action="increase">+</button>
+      </div>
+      <input class="cart-price-input" data-id="${escapeAttr(item.id)}" type="number" min="0" step="1" value="${escapeAttr(item.unitPrice)}" />
+      <button class="btn btn-ghost btn-small update-cart-item" data-id="${escapeAttr(item.id)}" data-action="remove">X</button>
+    </div>
+  `).join("");
+}
+
+function renderWaiterOrders() {
+  if (!canCreateOrders()) return;
+  const ownInvoices = invoices.filter((invoice) => !session || invoice.waiter === session.username).slice(0, 8);
+  if (!ownInvoices.length) {
+    el.waiterOrders.innerHTML = `<p class="empty-state">${escapeHtml(tr("emptyWaiterOrders"))}</p>`;
+    return;
+  }
+  el.waiterOrders.innerHTML = ownInvoices.map((invoice) => `
+    <article class="invoice-card">
+      <div class="invoice-head">
+        <div>
+          <strong>${escapeHtml(invoice.number)}</strong>
+          <p class="invoice-meta">${escapeHtml(tr("orderCreated"))}: ${escapeHtml(formatDateTime(invoice.createdAt))}</p>
+        </div>
+        ${buildStatusChip(getInvoiceProgress(invoice))}
+      </div>
+      <p class="invoice-meta">${escapeHtml(tr("orderTableLabel"))}: ${escapeHtml(invoice.table || "-")} | ${escapeHtml(tr("orderCustomerLabel"))}: ${escapeHtml(invoice.customer || tr("untitledCustomer"))}</p>
+      ${buildStationSummary(invoice)}
+      <p class="invoice-total">${escapeHtml(formatCurrency(invoice.total))}</p>
+    </article>
+  `).join("");
+}
+
+function renderStationBoard(station) {
+  const target = station === "bar" ? el.barBoard : el.kitchenBoard;
+  const emptyKey = station === "bar" ? "emptyBarBoard" : "emptyKitchenBoard";
+  if (!canViewStation(station)) return;
+  const stationInvoices = invoices.filter((invoice) => invoice.stationStatus[station] !== "na");
+  if (!stationInvoices.length) {
+    target.innerHTML = `<p class="empty-state">${escapeHtml(tr(emptyKey))}</p>`;
+    return;
+  }
+  target.innerHTML = stationInvoices.map((invoice) => {
+    const items = invoice.items.filter((item) => item.station === station);
+    const status = invoice.stationStatus[station];
+    return `
+      <article class="ticket-card">
+        <div class="ticket-head">
+          <div>
+            <strong>${escapeHtml(invoice.number)}</strong>
+            <p class="ticket-meta">${escapeHtml(formatDateTime(invoice.createdAt))}</p>
+          </div>
+          ${buildStatusChip(status)}
+        </div>
+        <p class="ticket-meta">${escapeHtml(tr("orderTableLabel"))}: ${escapeHtml(invoice.table || "-")} | ${escapeHtml(tr("orderCustomerLabel"))}: ${escapeHtml(invoice.customer || tr("untitledCustomer"))}</p>
+        <p class="ticket-meta">${escapeHtml(getRoleLabel("waiter"))}: ${escapeHtml(invoice.waiter)}</p>
+        <ul class="ticket-items">
+          ${items.map((item) => `<li><span>${escapeHtml(`${item.qty}x ${item.name[currentLanguage] || item.name.sq}`)}</span><strong>${escapeHtml(formatCurrency(item.totalPrice))}</strong></li>`).join("")}
+        </ul>
+        ${invoice.note ? `<p class="ticket-meta">${escapeHtml(invoice.note)}</p>` : ""}
+        <div class="panel-actions">
+          <button class="btn btn-primary btn-small station-ready-btn" data-id="${escapeAttr(invoice.id)}" data-station="${escapeAttr(station)}" ${status === "ready" ? "disabled" : ""}>${escapeHtml(tr("markReady"))}</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderAnalytics() {
+  if (!hasRole("admin")) return;
+  const day = getDayBounds();
+  const week = getWeekBounds();
+  const month = getMonthBounds();
+  el.dailyRevenueValue.textContent = formatCurrency(calculateRevenueForRange(day.start, day.end));
+  el.weeklyRevenueValue.textContent = formatCurrency(calculateRevenueForRange(week.start, week.end));
+  el.monthlyRevenueValue.textContent = formatCurrency(calculateRevenueForRange(month.start, month.end));
+  if (!invoices.length) {
+    el.invoiceHistory.innerHTML = `<p class="empty-state">${escapeHtml(tr("noInvoices"))}</p>`;
+    return;
+  }
+  el.invoiceHistory.innerHTML = invoices.map((invoice) => `
+    <article class="invoice-card">
+      <div class="invoice-head">
+        <div>
+          <strong>${escapeHtml(invoice.number)}</strong>
+          <p class="invoice-meta">${escapeHtml(formatDateTime(invoice.createdAt))}</p>
+        </div>
+        ${buildStatusChip(getInvoiceProgress(invoice))}
+      </div>
+      <p class="invoice-meta">${escapeHtml(tr("orderTableLabel"))}: ${escapeHtml(invoice.table || "-")} | ${escapeHtml(tr("orderCustomerLabel"))}: ${escapeHtml(invoice.customer || tr("untitledCustomer"))}</p>
+      <p class="invoice-meta">${escapeHtml(getRoleLabel("waiter"))}: ${escapeHtml(invoice.waiter)}</p>
+      <ul class="invoice-items">
+        ${invoice.items.map((item) => `<li><span>${escapeHtml(`${item.qty}x ${item.name[currentLanguage] || item.name.sq}`)}</span><strong>${escapeHtml(formatCurrency(item.totalPrice))}</strong></li>`).join("")}
+      </ul>
+      ${buildStationSummary(invoice)}
+      ${invoice.note ? `<p class="invoice-meta">${escapeHtml(invoice.note)}</p>` : ""}
+      <p class="invoice-total">${escapeHtml(formatCurrency(invoice.total))}</p>
+    </article>
+  `).join("");
+}
+
 function renderMenuEditor() {
-  const admin = hasRole("admin");
-  el.menuEditor.innerHTML = siteData.menu.map((item, idx) => `<div class="menu-edit-row" data-index="${idx}"><input data-field="name" value="${escapeAttr(item.name[currentLanguage] || "")}" /><input data-field="section" value="${escapeAttr(item.section[currentLanguage] || "")}" /><input data-field="price" value="${escapeAttr(item.price)}" /><select data-field="type" ${admin ? "" : "disabled"}><option value="food" ${item.type === "food" ? "selected" : ""}>food</option><option value="drink" ${item.type === "drink" ? "selected" : ""}>drink</option></select><button class="btn btn-ghost btn-small delete-menu-item" data-id="${escapeAttr(item.id)}" ${admin ? "" : "hidden"}>X</button></div>`).join("");
+  if (!hasRole("admin")) {
+    el.menuEditor.innerHTML = "";
+    return;
+  }
+  el.menuEditor.innerHTML = siteData.menu.map((item, idx) => `<div class="menu-edit-row" data-index="${idx}"><input data-field="name" value="${escapeAttr(item.name[currentLanguage] || "")}" /><input data-field="section" value="${escapeAttr(item.section[currentLanguage] || "")}" /><input data-field="price" value="${escapeAttr(item.price)}" /><select data-field="type"><option value="food" ${item.type === "food" ? "selected" : ""}>food</option><option value="drink" ${item.type === "drink" ? "selected" : ""}>drink</option></select><button class="btn btn-ghost btn-small delete-menu-item" data-id="${escapeAttr(item.id)}">X</button></div>`).join("");
   document.querySelectorAll(".delete-menu-item").forEach((button) => button.addEventListener("click", () => {
     if (!hasRole("admin")) return;
     siteData.menu = siteData.menu.filter((item) => item.id !== button.dataset.id);
@@ -829,13 +1330,13 @@ function renderReviewsEditor() {
 
 function renderUsers() {
   if (!hasRole("admin")) return;
-  el.usersList.innerHTML = users.map((user) => `<div class="user-row"><span>${escapeHtml(user.username)} (${escapeHtml(user.role)})</span><button class="btn btn-ghost btn-small delete-user" data-username="${escapeAttr(user.username)}" ${user.username === "admin" ? "disabled" : ""}>X</button></div>`).join("");
+  el.usersList.innerHTML = users.map((user) => `<div class="user-row"><span>${escapeHtml(user.username)} (${escapeHtml(getRoleLabel(user.role))})</span><button class="btn btn-ghost btn-small delete-user" data-username="${escapeAttr(user.username)}" ${user.username === "admin" ? "disabled" : ""}>${escapeHtml(tr("deleteUserLabel"))}</button></div>`).join("");
   document.querySelectorAll(".delete-user").forEach((button) => button.addEventListener("click", () => {
     users = users.filter((user) => user.username !== button.dataset.username);
     save(STORAGE_KEYS.users, users);
     renderUsers();
   }));
-  el.passwordTargetUser.innerHTML = users.map((user) => `<option value="${escapeAttr(user.username)}">${escapeHtml(user.username)} (${escapeHtml(user.role)})</option>`).join("");
+  el.passwordTargetUser.innerHTML = users.map((user) => `<option value="${escapeAttr(user.username)}">${escapeHtml(user.username)} (${escapeHtml(getRoleLabel(user.role))})</option>`).join("");
 }
 
 function renderAdminEditors() {
@@ -860,14 +1361,138 @@ function renderAdminEditors() {
   renderReviewsEditor();
   renderUsers();
   el.jsonEditor.value = JSON.stringify(siteData, null, 2);
+  renderAnalytics();
+}
+
+function syncDraftItem(item) {
+  const qty = Math.max(1, Number(item.qty) || 1);
+  const unitPrice = Math.max(0, Number(item.unitPrice) || 0);
+  return {
+    ...item,
+    qty,
+    unitPrice,
+    totalPrice: Math.round(qty * unitPrice)
+  };
+}
+
+function addMenuItemToDraft(menuId) {
+  const menuItem = siteData.menu.find((item) => item.id === menuId);
+  if (!menuItem || !isOrderableMenuItem(menuItem)) return;
+  const existing = orderDraft.items.find((item) => item.menuId === menuId);
+  if (existing) {
+    existing.qty += 1;
+    orderDraft.items = orderDraft.items.map((item) => item.id === existing.id ? syncDraftItem(item) : item);
+    return;
+  }
+  orderDraft.items.push(syncDraftItem({
+    id: `draft-${Date.now()}-${orderDraft.items.length + 1}`,
+    menuId: menuItem.id,
+    type: menuItem.type,
+    station: getItemStation(menuItem),
+    name: { ...menuItem.name },
+    section: { ...menuItem.section },
+    qty: 1,
+    unitPrice: extractPriceValue(menuItem.price),
+    priceLabel: menuItem.price
+  }));
+}
+
+function updateDraftItem(itemId, action, nextValue) {
+  if (action === "remove") {
+    orderDraft.items = orderDraft.items.filter((item) => item.id !== itemId);
+    return;
+  }
+  orderDraft.items = orderDraft.items.map((item) => {
+    if (item.id !== itemId) return item;
+    if (action === "increase") return syncDraftItem({ ...item, qty: item.qty + 1 });
+    if (action === "decrease") return syncDraftItem({ ...item, qty: Math.max(1, item.qty - 1) });
+    if (action === "price") return syncDraftItem({ ...item, unitPrice: nextValue });
+    return item;
+  });
+}
+
+function submitCurrentOrder() {
+  if (!canCreateOrders()) return;
+  if (!orderDraft.items.length) {
+    alert(tr("orderNeedsItems"));
+    return;
+  }
+  const createdAt = new Date();
+  const number = buildInvoiceNumber(createdAt);
+  const items = orderDraft.items.map((item, idx) => normalizeInvoiceItem({
+    ...item,
+    id: `${number}-L${idx + 1}`
+  }, idx));
+  invoices.unshift({
+    id: `${number}-${createdAt.getTime()}`,
+    number,
+    createdAt: createdAt.toISOString(),
+    waiter: session ? session.username : "staff",
+    table: orderDraft.table.trim(),
+    customer: orderDraft.customer.trim(),
+    note: orderDraft.note.trim(),
+    items,
+    total: items.reduce((sum, item) => sum + item.totalPrice, 0),
+    stationStatus: buildStationStatus(items)
+  });
+  persistInvoices();
+  orderDraft = createEmptyOrderDraft();
+  renderAll();
+  alert(tr("orderSubmitted"));
+}
+
+function markStationReady(invoiceId, station) {
+  if (!canViewStation(station)) return;
+  invoices = invoices.map((invoice) => {
+    if (invoice.id !== invoiceId) return invoice;
+    return {
+      ...invoice,
+      stationStatus: {
+        ...invoice.stationStatus,
+        [station]: invoice.stationStatus[station] === "na" ? "na" : "ready"
+      }
+    };
+  });
+  persistInvoices();
+  renderAll();
 }
 
 function applySessionUI() {
+  if (!STAFF_TOOLS_ENABLED) {
+    el.loginBtn.hidden = true;
+    el.logoutBtn.hidden = true;
+    el.manageBtn.hidden = true;
+    el.orderBlock.hidden = true;
+    el.barBoardBlock.hidden = true;
+    el.kitchenBoardBlock.hidden = true;
+    el.analyticsBlock.hidden = true;
+    el.menuEditorBlock.hidden = true;
+    el.generalEditorBlock.hidden = true;
+    el.galleryEditorBlock.hidden = true;
+    el.reviewsEditorBlock.hidden = true;
+    el.usersBlock.hidden = true;
+    el.passwordBlock.hidden = true;
+    el.jsonEditorBlock.hidden = true;
+    el.addMenuItemBtn.hidden = true;
+    el.controlPanel.hidden = true;
+    el.loginModal.hidden = true;
+    el.sessionInfo.textContent = tr("publicSiteMode");
+    return;
+  }
+
   const logged = !!session;
   const admin = hasRole("admin");
+  const orderAccess = canCreateOrders();
+  const barAccess = canViewStation("bar");
+  const kitchenAccess = canViewStation("kitchen");
   el.loginBtn.hidden = logged;
   el.logoutBtn.hidden = !logged;
   el.manageBtn.hidden = !logged;
+  el.orderBlock.hidden = !orderAccess;
+  el.barBoardBlock.hidden = !barAccess;
+  el.kitchenBoardBlock.hidden = !kitchenAccess;
+  el.analyticsBlock.hidden = !admin;
+  el.menuEditorBlock.hidden = !admin;
   el.generalEditorBlock.hidden = !admin;
   el.galleryEditorBlock.hidden = !admin;
   el.reviewsEditorBlock.hidden = !admin;
@@ -875,7 +1500,7 @@ function applySessionUI() {
   el.passwordBlock.hidden = !admin;
   el.jsonEditorBlock.hidden = !admin;
   el.addMenuItemBtn.hidden = !admin;
-  el.sessionInfo.textContent = logged ? (currentLanguage === "sq" ? `I loguar si ${session.username} (${session.role}).` : `Logged in as ${session.username} (${session.role}).`) : tr("sessionLoggedOut");
+  el.sessionInfo.textContent = logged ? (currentLanguage === "sq" ? `I loguar si ${session.username} (${getRoleLabel(session.role)}).` : `Logged in as ${session.username} (${getRoleLabel(session.role)}).`) : tr("sessionLoggedOut");
 }
 
 function renderAll() {
@@ -884,8 +1509,15 @@ function renderAll() {
   renderMenuGrid();
   renderGallery();
   renderReviews();
-  renderMenuEditor();
   applySessionUI();
+  if (canCreateOrders()) {
+    renderOrderCatalog();
+    renderOrderCart();
+    renderWaiterOrders();
+  }
+  if (canViewStation("bar")) renderStationBoard("bar");
+  if (canViewStation("kitchen")) renderStationBoard("kitchen");
+  renderMenuEditor();
   if (hasRole("admin")) renderAdminEditors();
 }
 
@@ -928,12 +1560,14 @@ function fileToDataUrl(file) {
 }
 
 function handleLoginSubmit() {
+  if (!STAFF_TOOLS_ENABLED) return;
   const user = users.find((entry) => entry.username === el.loginUsername.value.trim() && entry.password === el.loginPassword.value.trim());
   if (!user) {
     el.loginError.textContent = tr("invalidCredentials");
     return;
   }
   session = { username: user.username, role: user.role };
+  orderDraft = createEmptyOrderDraft();
   save(STORAGE_KEYS.session, session);
   el.loginUsername.value = "";
   el.loginPassword.value = "";
@@ -958,6 +1592,7 @@ function bindEvents() {
     el.revealElements.forEach((node) => observer.observe(node));
   }
   el.loginBtn.addEventListener("click", () => {
+    if (!STAFF_TOOLS_ENABLED) return;
     el.loginError.textContent = "";
     el.loginModal.hidden = false;
   });
@@ -975,16 +1610,57 @@ function bindEvents() {
       handleLoginSubmit();
     }
   });
+  el.orderTableInput.addEventListener("input", () => { orderDraft.table = el.orderTableInput.value; });
+  el.orderCustomerInput.addEventListener("input", () => { orderDraft.customer = el.orderCustomerInput.value; });
+  el.orderNoteInput.addEventListener("input", () => { orderDraft.note = el.orderNoteInput.value; });
+  el.orderSearchInput.addEventListener("input", () => {
+    orderDraft.search = el.orderSearchInput.value;
+    renderOrderCatalog();
+  });
+  el.orderCatalog.addEventListener("click", (event) => {
+    const button = event.target.closest(".add-order-item");
+    if (!button) return;
+    addMenuItemToDraft(button.dataset.id);
+    renderOrderCart();
+  });
+  el.orderCart.addEventListener("click", (event) => {
+    const button = event.target.closest(".update-cart-item");
+    if (!button) return;
+    updateDraftItem(button.dataset.id, button.dataset.action);
+    renderOrderCart();
+  });
+  el.orderCart.addEventListener("input", (event) => {
+    const input = event.target.closest(".cart-price-input");
+    if (!input) return;
+    updateDraftItem(input.dataset.id, "price", input.value);
+    renderOrderCart();
+  });
+  el.submitOrderBtn.addEventListener("click", submitCurrentOrder);
+  el.clearOrderBtn.addEventListener("click", () => {
+    orderDraft = createEmptyOrderDraft();
+    renderOrderCatalog();
+    renderOrderCart();
+  });
+  [el.barBoard, el.kitchenBoard].forEach((board) => board.addEventListener("click", (event) => {
+    const button = event.target.closest(".station-ready-btn");
+    if (!button) return;
+    markStationReady(button.dataset.id, button.dataset.station);
+  }));
   el.logoutBtn.addEventListener("click", () => {
+    if (!STAFF_TOOLS_ENABLED) return;
     session = null;
+    orderDraft = createEmptyOrderDraft();
     localStorage.removeItem(STORAGE_KEYS.session);
     el.controlPanel.hidden = true;
     renderAll();
   });
-  el.manageBtn.addEventListener("click", () => { el.controlPanel.hidden = !el.controlPanel.hidden; });
+  el.manageBtn.addEventListener("click", () => {
+    if (!STAFF_TOOLS_ENABLED) return;
+    el.controlPanel.hidden = !el.controlPanel.hidden;
+  });
   el.panelClose.addEventListener("click", () => { el.controlPanel.hidden = true; });
   el.saveMenuBtn.addEventListener("click", () => {
-    if (!session) return;
+    if (!hasRole("admin")) return;
     collectMenuEditor();
     persistSite();
     renderAll();
@@ -1128,5 +1804,12 @@ function bindEvents() {
 }
 
 persistSite();
+save(STORAGE_KEYS.users, users);
+persistInvoices();
+if (session) {
+  save(STORAGE_KEYS.session, session);
+} else {
+  localStorage.removeItem(STORAGE_KEYS.session);
+}
 renderAll();
 bindEvents();

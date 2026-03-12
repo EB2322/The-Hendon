@@ -148,8 +148,69 @@
 
     <p class="panel-language-note" id="editorLanguageInfo">Po editon gjuhen: Shqip</p>
 
-    <section class="panel-block">
-      <h4 id="menuEditorTitle">Menu Editor (admin + user)</h4>
+    <section class="panel-block" id="orderBlock" hidden>
+      <h4 id="orderPanelTitle">Porosite e Kamarierit</h4>
+      <p class="panel-help" id="orderPanelHelp">Krijo faturen dhe sistemi e dergon automatikisht te banaku ose kuzhina sipas artikujve.</p>
+      <div class="order-meta-grid">
+        <input id="orderTableInput" type="text" placeholder="Tavolina" />
+        <input id="orderCustomerInput" type="text" placeholder="Klienti" />
+      </div>
+      <label id="orderNoteLabel">Shenime per porosine</label>
+      <textarea id="orderNoteInput" rows="2" placeholder="Pa qepe, me pak akull..."></textarea>
+      <label id="orderSearchLabel">Kerko ne menu</label>
+      <input id="orderSearchInput" type="text" placeholder="Kafe, negroni, burger..." />
+      <div class="order-catalog" id="orderCatalog"></div>
+      <div class="order-cart" id="orderCart"></div>
+      <div class="order-summary">
+        <span id="orderTotalLabel">Totali</span>
+        <strong id="orderTotalValue">0 ALL</strong>
+      </div>
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-small" id="submitOrderBtn">Dergo Faturen</button>
+        <button class="btn btn-ghost btn-small" id="clearOrderBtn">Pastro</button>
+      </div>
+      <div class="staff-subsection">
+        <h5 id="waiterHistoryTitle">Faturat e mia</h5>
+        <div id="waiterOrders"></div>
+      </div>
+    </section>
+
+    <section class="panel-block" id="barBoardBlock" hidden>
+      <h4 id="barBoardTitle">Banaku</h4>
+      <p class="panel-help" id="barBoardHelp">Ketu shfaqen faturat me pije qe presin te pergatiten.</p>
+      <div id="barBoard"></div>
+    </section>
+
+    <section class="panel-block" id="kitchenBoardBlock" hidden>
+      <h4 id="kitchenBoardTitle">Kuzhina</h4>
+      <p class="panel-help" id="kitchenBoardHelp">Ketu shfaqen faturat me ushqim qe presin te pergatiten.</p>
+      <div id="kitchenBoard"></div>
+    </section>
+
+    <section class="panel-block admin-only" id="analyticsBlock" hidden>
+      <h4 id="analyticsTitle">Xhiro dhe Historik</h4>
+      <div class="stats-grid">
+        <article class="stat-card">
+          <span id="dailyRevenueLabel">Xhiro ditore</span>
+          <strong id="dailyRevenueValue">0 ALL</strong>
+        </article>
+        <article class="stat-card">
+          <span id="weeklyRevenueLabel">Xhiro javore</span>
+          <strong id="weeklyRevenueValue">0 ALL</strong>
+        </article>
+        <article class="stat-card">
+          <span id="monthlyRevenueLabel">Xhiro mujore</span>
+          <strong id="monthlyRevenueValue">0 ALL</strong>
+        </article>
+      </div>
+      <div class="staff-subsection">
+        <h5 id="invoiceHistoryTitle">Historiku i faturave</h5>
+        <div id="invoiceHistory"></div>
+      </div>
+    </section>
+
+    <section class="panel-block admin-only" id="menuEditorBlock" hidden>
+      <h4 id="menuEditorTitle">Menu Editor (vetem admin)</h4>
       <div id="menuEditor"></div>
       <div class="panel-actions">
         <button class="btn btn-primary btn-small" id="saveMenuBtn">Ruaj Menune</button>
@@ -235,7 +296,9 @@
         <input id="newUsername" type="text" placeholder="username" />
         <input id="newPassword" type="password" placeholder="password" />
         <select id="newRole">
-          <option value="user">user</option>
+          <option value="waiter">kamarier</option>
+          <option value="bar">banakier</option>
+          <option value="kitchen">kuzhine</option>
           <option value="admin">admin</option>
         </select>
         <button class="btn btn-primary btn-small" id="addUserBtn">Shto User</button>

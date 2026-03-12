@@ -25,10 +25,8 @@ const STATION_BY_TYPE = {
   drink: "bar"
 };
 const NON_ORDERABLE_SECTIONS = ["LEGJENDA E FORCES", "STRENGTH GUIDE"];
-const LOCAL_STAFF_HOSTS = new Set(["", "localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]"]);
-const CURRENT_HOSTNAME = window.location.hostname.toLowerCase();
-// Public static hosting cannot safely protect client-side staff tools.
-const STAFF_TOOLS_ENABLED = window.location.protocol === "file:" || LOCAL_STAFF_HOSTS.has(CURRENT_HOSTNAME);
+const STAFF_TOOLS_ENABLED = true;
+const API_POLL_INTERVAL_MS = 5000;
 
 const UI = {
   sq: {
@@ -516,6 +514,18 @@ function normalizeUsers(raw) {
   return normalized.length ? normalized : [...DEFAULT_USERS];
 }
 
+function normalizeUserSummaries(raw) {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set();
+  return raw
+    .filter((user) => user && user.username)
+    .map((user) => ({
+      username: String(user.username).trim(),
+      role: normalizeRole(user.role)
+    }))
+    .filter((user) => user.username && !seen.has(user.username) && (seen.add(user.username), true));
+}
+
 function normalizeSession(raw) {
   if (!STAFF_TOOLS_ENABLED || !raw || !raw.username) return null;
   return {
@@ -591,17 +601,14 @@ function normalizeSiteData(raw) {
   };
 }
 
-let siteData = normalizeSiteData(load(STORAGE_KEYS.data, null) || load(STORAGE_KEYS.legacyData, DEFAULT_DATA));
-let users = normalizeUsers(load(STORAGE_KEYS.users, DEFAULT_USERS));
-let invoices = normalizeInvoices(load(STORAGE_KEYS.invoices, []));
-let session = normalizeSession(load(STORAGE_KEYS.session, null));
+let siteData = normalizeSiteData(DEFAULT_DATA);
+let users = [];
+let invoices = [];
+let session = null;
 let currentLanguage = load(STORAGE_KEYS.language, "sq") === "en" ? "en" : "sq";
 let menuFilter = "all";
 let orderDraft = createEmptyOrderDraft();
-
-if (!STAFF_TOOLS_ENABLED) {
-  localStorage.removeItem(STORAGE_KEYS.session);
-}
+let syncTimer = null;
 
 const el = {
   metaDescription: document.querySelector('meta[name="description"]'),
@@ -797,14 +804,129 @@ function escapeAttr(value) {
   return escapeHtml(value).replaceAll("`", "&#96;");
 }
 
+function clearSyncTimer() {
+  if (syncTimer) {
+    clearInterval(syncTimer);
+    syncTimer = null;
+  }
+}
+
+function clearAuthenticatedState() {
+  session = null;
+  users = [];
+  invoices = [];
+  orderDraft = createEmptyOrderDraft();
+  clearSyncTimer();
+  if (el.controlPanel) el.controlPanel.hidden = true;
+}
+
+async function apiRequest(path, options = {}) {
+  const { method = "GET", body, suppressAuthReset = false } = options;
+  const requestOptions = {
+    method,
+    credentials: "include",
+    headers: {}
+  };
+  if (body !== undefined) {
+    requestOptions.headers["Content-Type"] = "application/json";
+    requestOptions.body = JSON.stringify(body);
+  }
+  let response;
+  try {
+    response = await fetch(path, requestOptions);
+  } catch {
+    throw new Error("Nuk u lidh me serverin.");
+  }
+  let payload = {};
+  const responseText = await response.text();
+  if (responseText) {
+    try {
+      payload = JSON.parse(responseText);
+    } catch {
+      payload = {};
+    }
+  }
+  if (!response.ok) {
+    if (response.status === 401 && !suppressAuthReset) {
+      clearAuthenticatedState();
+      renderAll();
+    }
+    throw new Error(payload.error || `Request failed (${response.status}).`);
+  }
+  return payload;
+}
+
+function applyBootstrap(payload, options = {}) {
+  const { preserveDraft = true } = options;
+  const previousUsername = session ? session.username : "";
+  const nextSession = normalizeSession(payload.session);
+  siteData = normalizeSiteData(payload.siteData || DEFAULT_DATA);
+  users = normalizeUserSummaries(payload.users || []);
+  invoices = normalizeInvoices(payload.invoices || []);
+  session = nextSession;
+  if (!session) users = [];
+  if (!preserveDraft || !session || previousUsername !== (session ? session.username : "")) {
+    orderDraft = createEmptyOrderDraft();
+  }
+}
+
+function updateSyncTimer() {
+  clearSyncTimer();
+  if (!session) return;
+  syncTimer = window.setInterval(() => {
+    refreshInvoicesFromServer().catch(() => {});
+  }, API_POLL_INTERVAL_MS);
+}
+
+function renderOperationalPanels() {
+  applySessionUI();
+  if (canCreateOrders()) {
+    renderOrderCatalog();
+    renderOrderCart();
+    renderWaiterOrders();
+  }
+  if (canViewStation("bar")) renderStationBoard("bar");
+  if (canViewStation("kitchen")) renderStationBoard("kitchen");
+  if (hasRole("admin")) renderAnalytics();
+}
+
+async function refreshBootstrap(options = {}) {
+  const { render = true, preserveDraft = true } = options;
+  const payload = await apiRequest("/api/bootstrap", { suppressAuthReset: true });
+  applyBootstrap(payload, { preserveDraft });
+  updateSyncTimer();
+  if (render) renderAll();
+}
+
+async function refreshInvoicesFromServer() {
+  if (!session) return;
+  try {
+    const payload = await apiRequest("/api/invoices");
+    invoices = normalizeInvoices(payload.invoices || []);
+    renderOperationalPanels();
+  } catch (error) {
+    if (error.message !== tr("sessionLoggedOut")) {
+      console.error(error);
+    }
+  }
+}
+
+async function saveSiteDataToServer(successKey) {
+  siteData = normalizeSiteData(siteData);
+  await apiRequest("/api/site-data", {
+    method: "PUT",
+    body: { siteData }
+  });
+  await refreshBootstrap({ render: true, preserveDraft: true });
+  if (successKey) alert(tr(successKey));
+}
+
 function persistSite() {
   siteData = normalizeSiteData(siteData);
-  save(STORAGE_KEYS.data, siteData);
 }
 
 function persistInvoices() {
   invoices = normalizeInvoices(invoices);
-  save(STORAGE_KEYS.invoices, invoices);
 }
 
 function hasRole(role) {
@@ -1331,10 +1453,16 @@ function renderReviewsEditor() {
 function renderUsers() {
   if (!hasRole("admin")) return;
   el.usersList.innerHTML = users.map((user) => `<div class="user-row"><span>${escapeHtml(user.username)} (${escapeHtml(getRoleLabel(user.role))})</span><button class="btn btn-ghost btn-small delete-user" data-username="${escapeAttr(user.username)}" ${user.username === "admin" ? "disabled" : ""}>${escapeHtml(tr("deleteUserLabel"))}</button></div>`).join("");
-  document.querySelectorAll(".delete-user").forEach((button) => button.addEventListener("click", () => {
-    users = users.filter((user) => user.username !== button.dataset.username);
-    save(STORAGE_KEYS.users, users);
-    renderUsers();
+  document.querySelectorAll(".delete-user").forEach((button) => button.addEventListener("click", async () => {
+    if (!hasRole("admin")) return;
+    try {
+      await apiRequest(`/api/users/${encodeURIComponent(button.dataset.username)}`, {
+        method: "DELETE"
+      });
+      await refreshBootstrap({ render: true, preserveDraft: true });
+    } catch (error) {
+      alert(error.message);
+    }
   }));
   el.passwordTargetUser.innerHTML = users.map((user) => `<option value="${escapeAttr(user.username)}">${escapeHtml(user.username)} (${escapeHtml(getRoleLabel(user.role))})</option>`).join("");
 }
@@ -1411,50 +1539,40 @@ function updateDraftItem(itemId, action, nextValue) {
   });
 }
 
-function submitCurrentOrder() {
+async function submitCurrentOrder() {
   if (!canCreateOrders()) return;
   if (!orderDraft.items.length) {
     alert(tr("orderNeedsItems"));
     return;
   }
-  const createdAt = new Date();
-  const number = buildInvoiceNumber(createdAt);
-  const items = orderDraft.items.map((item, idx) => normalizeInvoiceItem({
-    ...item,
-    id: `${number}-L${idx + 1}`
-  }, idx));
-  invoices.unshift({
-    id: `${number}-${createdAt.getTime()}`,
-    number,
-    createdAt: createdAt.toISOString(),
-    waiter: session ? session.username : "staff",
-    table: orderDraft.table.trim(),
-    customer: orderDraft.customer.trim(),
-    note: orderDraft.note.trim(),
-    items,
-    total: items.reduce((sum, item) => sum + item.totalPrice, 0),
-    stationStatus: buildStationStatus(items)
-  });
-  persistInvoices();
-  orderDraft = createEmptyOrderDraft();
-  renderAll();
-  alert(tr("orderSubmitted"));
+  try {
+    await apiRequest("/api/invoices", {
+      method: "POST",
+      body: {
+        table: orderDraft.table.trim(),
+        customer: orderDraft.customer.trim(),
+        note: orderDraft.note.trim(),
+        items: orderDraft.items
+      }
+    });
+    orderDraft = createEmptyOrderDraft();
+    await refreshBootstrap({ render: true, preserveDraft: false });
+    alert(tr("orderSubmitted"));
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
-function markStationReady(invoiceId, station) {
+async function markStationReady(invoiceId, station) {
   if (!canViewStation(station)) return;
-  invoices = invoices.map((invoice) => {
-    if (invoice.id !== invoiceId) return invoice;
-    return {
-      ...invoice,
-      stationStatus: {
-        ...invoice.stationStatus,
-        [station]: invoice.stationStatus[station] === "na" ? "na" : "ready"
-      }
-    };
-  });
-  persistInvoices();
-  renderAll();
+  try {
+    await apiRequest(`/api/invoices/${encodeURIComponent(invoiceId)}/stations/${encodeURIComponent(station)}/ready`, {
+      method: "POST"
+    });
+    await refreshInvoicesFromServer();
+  } catch (error) {
+    alert(error.message);
+  }
 }
 
 function applySessionUI() {
@@ -1559,20 +1677,27 @@ function fileToDataUrl(file) {
   });
 }
 
-function handleLoginSubmit() {
+async function handleLoginSubmit() {
   if (!STAFF_TOOLS_ENABLED) return;
-  const user = users.find((entry) => entry.username === el.loginUsername.value.trim() && entry.password === el.loginPassword.value.trim());
-  if (!user) {
-    el.loginError.textContent = tr("invalidCredentials");
-    return;
+  try {
+    const payload = await apiRequest("/api/auth/login", {
+      method: "POST",
+      body: {
+        username: el.loginUsername.value.trim(),
+        password: el.loginPassword.value.trim()
+      },
+      suppressAuthReset: true
+    });
+    applyBootstrap(payload, { preserveDraft: false });
+    updateSyncTimer();
+    el.loginUsername.value = "";
+    el.loginPassword.value = "";
+    el.loginError.textContent = "";
+    el.loginModal.hidden = true;
+    renderAll();
+  } catch (error) {
+    el.loginError.textContent = error.message || tr("invalidCredentials");
   }
-  session = { username: user.username, role: user.role };
-  orderDraft = createEmptyOrderDraft();
-  save(STORAGE_KEYS.session, session);
-  el.loginUsername.value = "";
-  el.loginPassword.value = "";
-  el.loginModal.hidden = true;
-  renderAll();
 }
 
 function bindEvents() {
@@ -1646,12 +1771,17 @@ function bindEvents() {
     if (!button) return;
     markStationReady(button.dataset.id, button.dataset.station);
   }));
-  el.logoutBtn.addEventListener("click", () => {
+  el.logoutBtn.addEventListener("click", async () => {
     if (!STAFF_TOOLS_ENABLED) return;
-    session = null;
-    orderDraft = createEmptyOrderDraft();
-    localStorage.removeItem(STORAGE_KEYS.session);
-    el.controlPanel.hidden = true;
+    try {
+      await apiRequest("/api/auth/logout", {
+        method: "POST",
+        suppressAuthReset: true
+      });
+    } catch {
+      // Ignore logout transport errors and clear the local session state anyway.
+    }
+    clearAuthenticatedState();
     renderAll();
   });
   el.manageBtn.addEventListener("click", () => {
@@ -1659,12 +1789,15 @@ function bindEvents() {
     el.controlPanel.hidden = !el.controlPanel.hidden;
   });
   el.panelClose.addEventListener("click", () => { el.controlPanel.hidden = true; });
-  el.saveMenuBtn.addEventListener("click", () => {
+  el.saveMenuBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
-    collectMenuEditor();
-    persistSite();
-    renderAll();
-    alert(tr("menuSaved"));
+    try {
+      collectMenuEditor();
+      persistSite();
+      await saveSiteDataToServer("menuSaved");
+    } catch (error) {
+      alert(error.message);
+    }
   });
   el.addMenuItemBtn.addEventListener("click", () => {
     if (!hasRole("admin")) return;
@@ -1672,29 +1805,35 @@ function bindEvents() {
     persistSite();
     renderAll();
   });
-  el.saveGeneralBtn.addEventListener("click", () => {
+  el.saveGeneralBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
-    siteData.content[currentLanguage] = normalizeContent({
-      businessName: el.editBusinessName.value.trim(),
-      metaDescription: siteData.content[currentLanguage].metaDescription,
-      hero: { kicker: el.editHeroKicker.value.trim(), title: el.editHeroTitle.value.trim(), lead: el.editHeroLead.value.trim(), image: el.editHeroImage.value.trim() },
-      about: { title: el.editAboutTitle.value.trim(), text: el.editAboutText.value.trim(), hours: el.editHours.value.trim(), address: el.editAddress.value.trim() },
-      menuTitle: el.editMenuTitle.value.trim(),
-      contact: { title: el.editContactTitle.value.trim(), text: el.editContactText.value.trim() }
-    }, DEFAULT_CONTENT[currentLanguage]);
-    siteData.links.phone = el.editPhone.value.trim() || siteData.links.phone;
-    siteData.links.mapsUrl = el.editMapsUrl.value.trim() || siteData.links.mapsUrl;
-    siteData.links.mapEmbed = el.editMapEmbed.value.trim() || siteData.links.mapEmbed;
-    persistSite();
-    renderAll();
-    alert(tr("generalSaved"));
+    try {
+      siteData.content[currentLanguage] = normalizeContent({
+        businessName: el.editBusinessName.value.trim(),
+        metaDescription: siteData.content[currentLanguage].metaDescription,
+        hero: { kicker: el.editHeroKicker.value.trim(), title: el.editHeroTitle.value.trim(), lead: el.editHeroLead.value.trim(), image: el.editHeroImage.value.trim() },
+        about: { title: el.editAboutTitle.value.trim(), text: el.editAboutText.value.trim(), hours: el.editHours.value.trim(), address: el.editAddress.value.trim() },
+        menuTitle: el.editMenuTitle.value.trim(),
+        contact: { title: el.editContactTitle.value.trim(), text: el.editContactText.value.trim() }
+      }, DEFAULT_CONTENT[currentLanguage]);
+      siteData.links.phone = el.editPhone.value.trim() || siteData.links.phone;
+      siteData.links.mapsUrl = el.editMapsUrl.value.trim() || siteData.links.mapsUrl;
+      siteData.links.mapEmbed = el.editMapEmbed.value.trim() || siteData.links.mapEmbed;
+      persistSite();
+      await saveSiteDataToServer("generalSaved");
+    } catch (error) {
+      alert(error.message);
+    }
   });
-  el.saveGalleryBtn.addEventListener("click", () => {
+  el.saveGalleryBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
-    collectGalleryEditor();
-    persistSite();
-    renderAll();
-    alert(tr("gallerySaved"));
+    try {
+      collectGalleryEditor();
+      persistSite();
+      await saveSiteDataToServer("gallerySaved");
+    } catch (error) {
+      alert(error.message);
+    }
   });
   el.addGalleryBtn.addEventListener("click", () => {
     if (!hasRole("admin")) return;
@@ -1723,12 +1862,15 @@ function bindEvents() {
     persistSite();
     renderAll();
   });
-  el.saveReviewsBtn.addEventListener("click", () => {
+  el.saveReviewsBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
-    collectReviewsEditor();
-    persistSite();
-    renderAll();
-    alert(tr("reviewsSaved"));
+    try {
+      collectReviewsEditor();
+      persistSite();
+      await saveSiteDataToServer("reviewsSaved");
+    } catch (error) {
+      alert(error.message);
+    }
   });
   el.addReviewBtn.addEventListener("click", () => {
     if (!hasRole("admin")) return;
@@ -1736,15 +1878,14 @@ function bindEvents() {
     persistSite();
     renderAll();
   });
-  el.applyJsonBtn.addEventListener("click", () => {
+  el.applyJsonBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
     try {
       siteData = normalizeSiteData(JSON.parse(el.jsonEditor.value));
       persistSite();
-      renderAll();
-      alert(tr("jsonSaved"));
-    } catch {
-      alert(tr("jsonInvalid"));
+      await saveSiteDataToServer("jsonSaved");
+    } catch (error) {
+      alert(error.message || tr("jsonInvalid"));
     }
   });
   el.refreshJsonBtn.addEventListener("click", () => { if (hasRole("admin")) el.jsonEditor.value = JSON.stringify(siteData, null, 2); });
@@ -1757,7 +1898,7 @@ function bindEvents() {
     link.click();
     URL.revokeObjectURL(link.href);
   });
-  el.addUserBtn.addEventListener("click", () => {
+  el.addUserBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
     const username = el.newUsername.value.trim();
     const password = el.newPassword.value.trim();
@@ -1769,26 +1910,38 @@ function bindEvents() {
       alert(tr("usernameExists"));
       return;
     }
-    users.push({ username, password, role: el.newRole.value });
-    save(STORAGE_KEYS.users, users);
-    el.newUsername.value = "";
-    el.newPassword.value = "";
-    renderUsers();
+    try {
+      await apiRequest("/api/users", {
+        method: "POST",
+        body: { username, password, role: el.newRole.value }
+      });
+      el.newUsername.value = "";
+      el.newPassword.value = "";
+      await refreshBootstrap({ render: true, preserveDraft: true });
+    } catch (error) {
+      alert(error.message);
+    }
   });
-  el.changeSelfPasswordBtn.addEventListener("click", () => {
-    if (!hasRole("admin")) return;
+  el.changeSelfPasswordBtn.addEventListener("click", async () => {
+    if (!session) return;
     const newPassword = el.selfNewPassword.value.trim();
     if (!newPassword) {
       alert(tr("newPasswordRequired"));
       return;
     }
-    users = users.map((user) => user.username === session.username ? { ...user, password: newPassword } : user);
-    save(STORAGE_KEYS.users, users);
-    el.selfNewPassword.value = "";
-    renderUsers();
-    alert(tr("selfPasswordChanged"));
+    try {
+      await apiRequest("/api/users/password", {
+        method: "PATCH",
+        body: { newPassword }
+      });
+      el.selfNewPassword.value = "";
+      await refreshBootstrap({ render: true, preserveDraft: true });
+      alert(tr("selfPasswordChanged"));
+    } catch (error) {
+      alert(error.message);
+    }
   });
-  el.changeUserPasswordBtn.addEventListener("click", () => {
+  el.changeUserPasswordBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
     const target = el.passwordTargetUser.value;
     const newPassword = el.targetNewPassword.value.trim();
@@ -1796,20 +1949,21 @@ function bindEvents() {
       alert(tr("chooseUserAndPassword"));
       return;
     }
-    users = users.map((user) => user.username === target ? { ...user, password: newPassword } : user);
-    save(STORAGE_KEYS.users, users);
-    el.targetNewPassword.value = "";
-    renderUsers();
+    try {
+      await apiRequest("/api/users/password", {
+        method: "PATCH",
+        body: { username: target, newPassword }
+      });
+      el.targetNewPassword.value = "";
+      await refreshBootstrap({ render: true, preserveDraft: true });
+    } catch (error) {
+      alert(error.message);
+    }
   });
 }
 
-persistSite();
-save(STORAGE_KEYS.users, users);
-persistInvoices();
-if (session) {
-  save(STORAGE_KEYS.session, session);
-} else {
-  localStorage.removeItem(STORAGE_KEYS.session);
-}
 renderAll();
 bindEvents();
+refreshBootstrap({ render: true, preserveDraft: false }).catch((error) => {
+  el.sessionInfo.textContent = error.message;
+});

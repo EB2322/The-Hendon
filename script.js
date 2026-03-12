@@ -609,6 +609,7 @@ let invoices = [];
 let session = null;
 let currentLanguage = load(STORAGE_KEYS.language, "sq") === "en" ? "en" : "sq";
 let menuFilter = "all";
+let menuCategory = "all";
 let orderDraft = createEmptyOrderDraft();
 let syncTimer = null;
 let backendAvailable = null;
@@ -649,6 +650,7 @@ const el = {
   filterAllBtn: document.getElementById("filterAllBtn"),
   filterFoodBtn: document.getElementById("filterFoodBtn"),
   filterDrinkBtn: document.getElementById("filterDrinkBtn"),
+  menuCategoryBar: document.getElementById("menuCategoryBar"),
   menuGrid: document.getElementById("menuGrid"),
   galleryTag: document.getElementById("galleryTag"),
   galleryTitle: document.getElementById("galleryTitle"),
@@ -1309,8 +1311,29 @@ function localizePrice(price) {
   return value;
 }
 
+function getVisibleMenuItems() {
+  return siteData.menu.filter((item) => menuFilter === "all" || item.type === menuFilter);
+}
+
+function renderMenuCategoryBar() {
+  const items = getVisibleMenuItems();
+  const categories = [...new Set(items.map((item) => item.section[currentLanguage] || item.section.sq).filter(Boolean))];
+  if (!categories.length) {
+    el.menuCategoryBar.innerHTML = "";
+    return;
+  }
+  if (menuCategory !== "all" && !categories.includes(menuCategory)) {
+    menuCategory = "all";
+  }
+  el.menuCategoryBar.innerHTML = [
+    `<button class="menu-category-btn ${menuCategory === "all" ? "active" : ""}" data-category="all" type="button">${escapeHtml(tr("allCategories"))}</button>`,
+    ...categories.map((category) => `<button class="menu-category-btn ${menuCategory === category ? "active" : ""}" data-category="${escapeAttr(category)}" type="button">${escapeHtml(category)}</button>`)
+  ].join("");
+}
+
 function renderMenuGrid() {
-  const items = siteData.menu.filter((item) => menuFilter === "all" || item.type === menuFilter);
+  const items = getVisibleMenuItems().filter((item) => menuCategory === "all" || (item.section[currentLanguage] || item.section.sq) === menuCategory);
+  renderMenuCategoryBar();
   if (!items.length) {
     el.menuGrid.innerHTML = `<article class="menu-section"><h3>${escapeHtml(tr("menuEmptyTitle"))}</h3><p class="menu-empty">${escapeHtml(tr("menuEmptyText"))}</p></article>`;
     return;
@@ -1902,8 +1925,15 @@ function bindEvents() {
     el.filterButtons.forEach((btn) => btn.classList.remove("active"));
     button.classList.add("active");
     menuFilter = button.dataset.filter;
+    menuCategory = "all";
     renderMenuGrid();
   }));
+  el.menuCategoryBar.addEventListener("click", (event) => {
+    const button = event.target.closest(".menu-category-btn");
+    if (!button) return;
+    menuCategory = button.dataset.category || "all";
+    renderMenuGrid();
+  });
   if (typeof IntersectionObserver !== "undefined") {
     const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("visible")), { threshold: 0.15 });
     el.revealElements.forEach((node) => observer.observe(node));

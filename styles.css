@@ -344,6 +344,13 @@ h2 {
   flex-wrap: wrap;
 }
 
+.menu-category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: -0.3rem 0 1.1rem;
+}
+
 .filter-btn {
   border: 1px solid var(--line);
   background: transparent;
@@ -358,6 +365,24 @@ h2 {
   background: var(--accent);
   color: #111;
   border-color: var(--accent);
+}
+
+.menu-category-btn {
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #121212;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.menu-category-btn.active,
+.menu-category-btn:hover {
+  background: rgba(212, 138, 44, 0.18);
+  border-color: rgba(212, 138, 44, 0.6);
+  color: var(--text);
 }
 
 .menu-grid {

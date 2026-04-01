@@ -19,6 +19,8 @@ from backend.store import HendonStore, SESSION_DAYS, build_station_status, iso_n
 
 
 BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIST_DIR = BASE_DIR / "frontend" / "dist" / "frontend" / "browser"
+STATIC_DIR = FRONTEND_DIST_DIR if (FRONTEND_DIST_DIR / "index.html").exists() else BASE_DIR
 STORE = HendonStore(BASE_DIR / "data" / "hendon.sqlite3", BASE_DIR / "data" / "menu-data.js")
 SESSION_COOKIE = "hendon_session"
 HOST = os.environ.get("HOST", "0.0.0.0")
@@ -107,7 +109,7 @@ class HendonHandler(SimpleHTTPRequestHandler):
     server_version = "HendonServer/1.0"
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, directory=str(BASE_DIR), **kwargs)
+        super().__init__(*args, directory=str(STATIC_DIR), **kwargs)
 
     def end_headers(self) -> None:
         self.send_header("Cache-Control", "no-store")
@@ -118,7 +120,21 @@ class HendonHandler(SimpleHTTPRequestHandler):
         if path.startswith("/api/"):
             self.handle_api("GET", path)
             return
+        if STATIC_DIR != BASE_DIR and self.should_serve_spa_index(path):
+            self.path = "/index.html"
         super().do_GET()
+
+    def should_serve_spa_index(self, path: str) -> bool:
+        if path in {"", "/"}:
+            return True
+        requested = (STATIC_DIR / path.lstrip("/")).resolve()
+        try:
+            requested.relative_to(STATIC_DIR.resolve())
+        except ValueError:
+            return False
+        if requested.exists():
+            return False
+        return "." not in Path(path).name
 
     def do_POST(self) -> None:
         self.handle_api("POST", urlparse(self.path).path)

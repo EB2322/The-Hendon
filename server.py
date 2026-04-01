@@ -19,7 +19,7 @@ from backend.store import HendonStore, SESSION_DAYS, build_station_status, iso_n
 
 
 BASE_DIR = Path(__file__).resolve().parent
-FRONTEND_DIST_DIR = BASE_DIR / "frontend" / "dist" / "frontend" / "browser"
+FRONTEND_DIST_DIR = BASE_DIR / "angular" / "dist" / "frontend" / "browser"
 STATIC_DIR = FRONTEND_DIST_DIR if (FRONTEND_DIST_DIR / "index.html").exists() else BASE_DIR
 STORE = HendonStore(BASE_DIR / "data" / "hendon.sqlite3", BASE_DIR / "data" / "menu-data.js")
 SESSION_COOKIE = "hendon_session"

@@ -1,7 +1,3 @@
 __pycache__/
 backend/__pycache__/
 data/hendon.sqlite3
-angular/node_modules/
-angular/dist/
-the-hendon-2/node_modules/
-the-hendon-2/dist/

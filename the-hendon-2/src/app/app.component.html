@@ -1,0 +1,344 @@
+<header class="site-header" id="top">
+  <div class="container nav-wrap">
+    <a href="#top" class="logo">
+      <img src="assets/gallery/the-hendon-pub.jpg?v=20260311" alt="The Hendon Pub logo" class="logo-mark" />
+      <span id="brandName">The Hendon</span>
+    </a>
+    <button class="menu-toggle" id="menuToggleBtn" aria-label="Hap menune">&#9776;</button>
+    <nav class="nav-links">
+      <a href="#about" id="navAboutLink">Rreth Nesh</a>
+      <a href="#menu" id="navMenuLink">Menu</a>
+      <a href="#gallery" id="navGalleryLink">Galeri</a>
+      <a href="#contact" id="navContactLink">Kontakt</a>
+    </nav>
+    <div class="top-actions">
+      <div class="lang-switcher" aria-label="Language switcher">
+        <button class="lang-btn active" id="langSqBtn" type="button" aria-label="Shqip">
+          <span class="flag" aria-hidden="true">SQ</span>
+        </button>
+        <button class="lang-btn" id="langEnBtn" type="button" aria-label="English">
+          <span class="flag" aria-hidden="true">EN</span>
+        </button>
+      </div>
+      <div class="auth-actions">
+        <button class="btn btn-ghost btn-small" id="manageBtn" hidden>Manage</button>
+        <button class="btn btn-ghost btn-small" id="loginBtn">Login</button>
+        <button class="btn btn-ghost btn-small" id="logoutBtn" hidden>Logout</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="heroSection">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <div class="hero-copy">
+      <p class="kicker" id="heroKicker">Pub & Grill</p>
+      <h1 id="heroTitle">Shija e Nates ne Zemer te Qytetit</h1>
+      <p class="lead" id="heroLead">Atmosfere autentike, kuzhine tradicionale dhe kokteje te kuruara per cdo mbremje.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" id="heroMenuBtn" href="#menu">Shiko Menune</a>
+        <a class="btn btn-ghost" id="mapsLink" target="_blank" rel="noopener" href="#">Na Gjej ne Maps</a>
+      </div>
+      <div class="hero-highlights" id="heroHighlights">
+        <article class="hero-highlight">
+          <span class="hero-highlight-label">Open Daily</span>
+          <strong id="heroHoursBadge">07:00 - 00:00</strong>
+        </article>
+        <article class="hero-highlight">
+          <span class="hero-highlight-label">Location</span>
+          <strong id="heroAddressBadge">Delijorgji, Tirane</strong>
+        </article>
+        <article class="hero-highlight">
+          <span class="hero-highlight-label">Contact</span>
+          <strong id="heroPhoneBadge">+355698757893</strong>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main>
+  <section class="about section" id="about">
+    <div class="container about-grid reveal">
+      <div>
+        <p class="section-tag" id="aboutTag">Rreth Nesh</p>
+        <h2 id="aboutTitle">Pub me Stil Modern</h2>
+        <p id="aboutText"></p>
+      </div>
+      <div class="about-card">
+        <h3 id="hoursLabel">Orari</h3>
+        <p id="hoursText"></p>
+        <h3 id="addressLabel">Adresa</h3>
+        <p id="addressText"></p>
+        <a class="text-link" id="addressLink" target="_blank" rel="noopener" href="#">Hap lokacionin</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="menu section" id="menu">
+    <div class="container reveal">
+      <p class="section-tag" id="menuTag">Menu</p>
+      <h2 id="menuTitle">Te Preferuarat</h2>
+
+      <div class="filters">
+        <button class="filter-btn active" id="filterAllBtn" data-filter="all">Te Gjitha</button>
+        <button class="filter-btn" id="filterFoodBtn" data-filter="food">Ushqim</button>
+        <button class="filter-btn" id="filterDrinkBtn" data-filter="drink">Pije</button>
+      </div>
+      <div class="menu-category-bar" id="menuCategoryBar"></div>
+
+      <div class="menu-grid" id="menuGrid"></div>
+    </div>
+  </section>
+
+  <section class="gallery section" id="gallery">
+    <div class="container reveal">
+      <p class="section-tag" id="galleryTag">Galeri</p>
+      <h2 id="galleryTitle">Atmosfera</h2>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <section class="reviews section" id="reviewsSection">
+    <div class="container reveal">
+      <p class="section-tag" id="reviewsTag">Vleresime</p>
+      <div class="reviews-top">
+        <h2 id="reviewsTitle">Cfare Thone Klientet</h2>
+        <a class="btn btn-ghost btn-small" id="allReviewsLink" target="_blank" rel="noopener" href="#">Shiko te gjitha ne Google</a>
+      </div>
+      <div class="reviews-grid" id="reviewsGrid"></div>
+    </div>
+  </section>
+
+  <section class="contact section" id="contact">
+    <div class="container contact-grid reveal">
+      <div>
+        <p class="section-tag" id="contactTag">Kontakt</p>
+        <h2 id="contactTitle">Rezervo Tavolinen Tende</h2>
+        <p id="contactText"></p>
+        <a class="btn btn-primary" id="phoneLink" href="tel:+355698757893">+355698757893</a>
+        <div class="social-links">
+          <a class="btn btn-ghost btn-small" id="instagramLink" target="_blank" rel="noopener" href="#">Instagram</a>
+          <a class="btn btn-ghost btn-small" id="youtubeLink" target="_blank" rel="noopener" href="#">YouTube</a>
+          <a class="btn btn-ghost btn-small" id="tiktokLink" target="_blank" rel="noopener" href="#">TikTok</a>
+        </div>
+      </div>
+      <iframe
+        id="mapEmbed"
+        title="Lokacioni ne harte"
+        src=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; <span id="year"></span> <span id="footerName">The Hendon Pub</span>. <span id="footerRights">Te gjitha te drejtat e rezervuara.</span></p>
+    <p class="small-note" id="sessionInfo"></p>
+  </div>
+</footer>
+
+<aside class="control-panel" id="controlPanel" hidden>
+  <div class="panel-header">
+    <h3 id="panelTitle">Paneli i Menaxhimit</h3>
+    <button id="panelClose" class="btn btn-ghost btn-small">Mbyll</button>
+  </div>
+
+  <p class="panel-language-note" id="editorLanguageInfo">Po editon gjuhen: Shqip</p>
+
+  <section class="panel-block" id="orderBlock" hidden>
+    <h4 id="orderPanelTitle">Porosite e Kamarierit</h4>
+    <p class="panel-help" id="orderPanelHelp">Krijo faturen dhe sistemi e dergon automatikisht te banaku ose kuzhina sipas artikujve.</p>
+    <div class="order-meta-grid">
+      <input id="orderTableInput" type="text" placeholder="Tavolina" />
+      <input id="orderCustomerInput" type="text" placeholder="Klienti" />
+    </div>
+    <label id="orderNoteLabel">Shenime per porosine</label>
+    <textarea id="orderNoteInput" rows="2" placeholder="Pa qepe, me pak akull..."></textarea>
+    <label id="orderSearchLabel">Kerko ne menu</label>
+    <input id="orderSearchInput" type="text" placeholder="Kafe, negroni, burger..." />
+    <div class="order-category-bar" id="orderCategoryBar"></div>
+    <div class="order-catalog" id="orderCatalog"></div>
+    <div class="order-cart" id="orderCart"></div>
+    <div class="order-summary">
+      <span id="orderTotalLabel">Totali</span>
+      <strong id="orderTotalValue">0 ALL</strong>
+    </div>
+    <div class="panel-actions">
+      <button class="btn btn-primary btn-small" id="submitOrderBtn">Dergo Faturen</button>
+      <button class="btn btn-ghost btn-small" id="clearOrderBtn">Pastro</button>
+    </div>
+    <div class="staff-subsection">
+      <h5 id="waiterHistoryTitle">Faturat e mia</h5>
+      <div id="waiterOrders"></div>
+    </div>
+  </section>
+
+  <section class="panel-block" id="barBoardBlock" hidden>
+    <h4 id="barBoardTitle">Banaku</h4>
+    <p class="panel-help" id="barBoardHelp">Ketu shfaqen faturat me pije qe presin te pergatiten.</p>
+    <div id="barBoard"></div>
+  </section>
+
+  <section class="panel-block" id="kitchenBoardBlock" hidden>
+    <h4 id="kitchenBoardTitle">Kuzhina</h4>
+    <p class="panel-help" id="kitchenBoardHelp">Ketu shfaqen faturat me ushqim qe presin te pergatiten.</p>
+    <div id="kitchenBoard"></div>
+  </section>
+
+  <section class="panel-block admin-only" id="analyticsBlock" hidden>
+    <h4 id="analyticsTitle">Xhiro dhe Historik</h4>
+    <div class="stats-grid">
+      <article class="stat-card">
+        <span id="dailyRevenueLabel">Xhiro ditore</span>
+        <strong id="dailyRevenueValue">0 ALL</strong>
+      </article>
+      <article class="stat-card">
+        <span id="weeklyRevenueLabel">Xhiro javore</span>
+        <strong id="weeklyRevenueValue">0 ALL</strong>
+      </article>
+      <article class="stat-card">
+        <span id="monthlyRevenueLabel">Xhiro mujore</span>
+        <strong id="monthlyRevenueValue">0 ALL</strong>
+      </article>
+    </div>
+    <div class="staff-subsection">
+      <h5 id="invoiceHistoryTitle">Historiku i faturave</h5>
+      <div id="invoiceHistory"></div>
+    </div>
+  </section>
+
+  <section class="panel-block admin-only" id="menuEditorBlock" hidden>
+    <h4 id="menuEditorTitle">Menu Editor (vetem admin)</h4>
+    <div id="menuEditor"></div>
+    <div class="panel-actions">
+      <button class="btn btn-primary btn-small" id="saveMenuBtn">Ruaj Menune</button>
+      <button class="btn btn-ghost btn-small" id="addMenuItemBtn" hidden>Shto Artikull</button>
+    </div>
+  </section>
+
+  <section class="panel-block admin-only" id="generalEditorBlock" hidden>
+    <h4 id="generalEditorTitle">General Editor (vetem admin)</h4>
+    <label id="labelBusinessName">Emri i biznesit</label>
+    <input id="editBusinessName" type="text" />
+    <label id="labelHeroKicker">Hero kicker</label>
+    <input id="editHeroKicker" type="text" />
+    <label id="labelHeroTitle">Hero title</label>
+    <input id="editHeroTitle" type="text" />
+    <label id="labelHeroText">Hero text</label>
+    <textarea id="editHeroLead" rows="3"></textarea>
+    <label id="labelAboutTitle">About title</label>
+    <input id="editAboutTitle" type="text" />
+    <label id="labelAboutText">About text</label>
+    <textarea id="editAboutText" rows="3"></textarea>
+    <label id="labelMenuTitle">Menu title</label>
+    <input id="editMenuTitle" type="text" />
+    <label id="labelHours">Orari</label>
+    <input id="editHours" type="text" />
+    <label id="labelAddress">Adresa</label>
+    <input id="editAddress" type="text" />
+    <label id="labelContactTitle">Kontakt title</label>
+    <input id="editContactTitle" type="text" />
+    <label id="labelContactText">Kontakt text</label>
+    <textarea id="editContactText" rows="3"></textarea>
+    <label id="labelPhone">Telefon</label>
+    <input id="editPhone" type="text" />
+    <label id="labelMapsUrl">Link Google Maps</label>
+    <input id="editMapsUrl" type="url" />
+    <label id="labelMapEmbed">Map embed URL</label>
+    <input id="editMapEmbed" type="url" />
+    <label id="labelHeroImage">Hero image URL</label>
+    <input id="editHeroImage" type="url" />
+    <button class="btn btn-primary btn-small" id="saveGeneralBtn">Ruaj General</button>
+  </section>
+
+  <section class="panel-block admin-only" id="jsonEditorBlock" hidden>
+    <h4 id="jsonEditorTitle">JSON Data (vetem admin)</h4>
+    <p class="panel-help" id="jsonEditorHelp">Ketu mund te shikosh, importosh ose shkarkosh te gjitha te dhenat e faqes.</p>
+    <textarea id="jsonEditor" rows="14" spellcheck="false"></textarea>
+    <div class="panel-actions">
+      <button class="btn btn-primary btn-small" id="applyJsonBtn">Ruaj JSON</button>
+      <button class="btn btn-ghost btn-small" id="refreshJsonBtn">Rifresko JSON</button>
+      <button class="btn btn-ghost btn-small" id="downloadJsonBtn">Shkarko JSON</button>
+    </div>
+  </section>
+
+  <section class="panel-block admin-only" id="galleryEditorBlock" hidden>
+    <h4 id="galleryEditorTitle">Gallery Editor (vetem admin)</h4>
+    <label id="labelGalleryImport">Import foto nga URL (nje per rresht)</label>
+    <textarea id="galleryUrlsBulk" rows="4" placeholder="https://...&#10;https://..."></textarea>
+    <div class="panel-actions">
+      <button class="btn btn-ghost btn-small" id="importGalleryUrlsBtn">Importo URL</button>
+    </div>
+    <label id="labelGalleryUpload">Upload foto nga kompjuteri</label>
+    <input id="galleryFileInput" type="file" accept="image/*" multiple />
+    <div id="galleryEditor"></div>
+    <div class="panel-actions">
+      <button class="btn btn-primary btn-small" id="saveGalleryBtn">Ruaj Galerine</button>
+      <button class="btn btn-ghost btn-small" id="addGalleryBtn">Shto Foto</button>
+    </div>
+  </section>
+
+  <section class="panel-block admin-only" id="reviewsEditorBlock" hidden>
+    <h4 id="reviewsEditorTitle">Reviews Editor (vetem admin)</h4>
+    <div id="reviewsEditor"></div>
+    <div class="panel-actions">
+      <button class="btn btn-primary btn-small" id="saveReviewsBtn">Ruaj Reviews</button>
+      <button class="btn btn-ghost btn-small" id="addReviewBtn">Shto Review</button>
+    </div>
+  </section>
+
+  <section class="panel-block admin-only" id="usersBlock" hidden>
+    <h4 id="usersTitle">Users (vetem admin)</h4>
+    <div id="usersList"></div>
+    <div class="user-add">
+      <input id="newUsername" type="text" placeholder="username" />
+      <input id="newPassword" type="password" placeholder="password" />
+      <select id="newRole">
+        <option value="waiter">kamarier</option>
+        <option value="bar">banakier</option>
+        <option value="kitchen">kuzhine</option>
+        <option value="admin">admin</option>
+      </select>
+      <button class="btn btn-primary btn-small" id="addUserBtn">Shto User</button>
+    </div>
+  </section>
+
+  <section class="panel-block admin-only" id="passwordBlock" hidden>
+    <h4 id="passwordManagerTitle">Password Manager (vetem admin)</h4>
+    <label id="labelOwnPassword">Ndrysho password-in tend</label>
+    <div class="user-add password-grid">
+      <input id="selfNewPassword" type="password" placeholder="password i ri" />
+      <button class="btn btn-primary btn-small" id="changeSelfPasswordBtn">Ndrysho</button>
+    </div>
+    <label id="labelOtherPassword">Ndrysho password per user tjeter</label>
+    <div class="user-add password-grid">
+      <select id="passwordTargetUser"></select>
+      <input id="targetNewPassword" type="password" placeholder="password i ri" />
+      <button class="btn btn-primary btn-small" id="changeUserPasswordBtn">Ruaj</button>
+    </div>
+  </section>
+</aside>
+
+<div class="modal" id="loginModal" hidden>
+  <div class="modal-card">
+    <h3 id="loginTitle">Login</h3>
+    <label id="loginUsernameLabel">Username</label>
+    <input id="loginUsername" type="text" />
+    <label id="loginPasswordLabel">Password</label>
+    <div class="password-field">
+      <input id="loginPassword" type="password" />
+      <button class="password-toggle" id="toggleLoginPasswordBtn" type="button" aria-label="Shfaq passwordin">Show</button>
+    </div>
+    <div class="panel-actions">
+      <button class="btn btn-primary btn-small" id="submitLoginBtn">Hyr</button>
+      <button class="btn btn-ghost btn-small" id="cancelLoginBtn">Anulo</button>
+    </div>
+    <p id="loginError" class="error-text"></p>
+  </div>
+</div>
+

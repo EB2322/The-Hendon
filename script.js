@@ -33,6 +33,7 @@ const UI = {
   sq: {
     navAbout: "Rreth Nesh", navMenu: "Menu", navGallery: "Galeri", navContact: "Kontakt",
     manage: "Menaxho", login: "Hyr", logout: "Dil", heroMenu: "Shiko Menune", maps: "Na Gjej ne Maps",
+    heroBadgeHours: "Orari", heroBadgeLocation: "Vendndodhja", heroBadgeContact: "Kontakt",
     aboutTag: "Rreth Nesh", hours: "Orari", address: "Adresa", openLocation: "Hap lokacionin",
     menuTag: "Menu", filterAll: "Te Gjitha", filterFood: "Ushqim", filterDrink: "Pije",
     galleryTag: "Galeri", galleryTitle: "Atmosfera", reviewsTag: "Vleresime", reviewsTitle: "Cfare Thone Klientet",
@@ -78,6 +79,7 @@ const UI = {
   en: {
     navAbout: "About", navMenu: "Menu", navGallery: "Gallery", navContact: "Contact",
     manage: "Manage", login: "Login", logout: "Logout", heroMenu: "View Menu", maps: "Find Us on Maps",
+    heroBadgeHours: "Hours", heroBadgeLocation: "Location", heroBadgeContact: "Contact",
     aboutTag: "About", hours: "Opening Hours", address: "Address", openLocation: "Open location",
     menuTag: "Menu", filterAll: "All", filterFood: "Food", filterDrink: "Drinks",
     galleryTag: "Gallery", galleryTitle: "Atmosphere", reviewsTag: "Reviews", reviewsTitle: "What Guests Say",
@@ -637,6 +639,10 @@ const el = {
   heroLead: document.getElementById("heroLead"),
   heroMenuBtn: document.getElementById("heroMenuBtn"),
   mapsLink: document.getElementById("mapsLink"),
+  heroHoursBadge: document.getElementById("heroHoursBadge"),
+  heroAddressBadge: document.getElementById("heroAddressBadge"),
+  heroPhoneBadge: document.getElementById("heroPhoneBadge"),
+  heroHighlightLabels: [...document.querySelectorAll(".hero-highlight-label")],
   aboutTag: document.getElementById("aboutTag"),
   aboutTitle: document.getElementById("aboutTitle"),
   aboutText: document.getElementById("aboutText"),
@@ -811,6 +817,47 @@ function updatePasswordToggleLabel() {
   el.toggleLoginPasswordBtn.setAttribute("aria-label", visible ? "Fsheh passwordin" : "Shfaq passwordin");
 }
 
+function syncBodyState() {
+  document.body.classList.toggle("menu-open", el.navLinks.classList.contains("open"));
+  document.body.classList.toggle("modal-open", !el.loginModal.hidden);
+  document.body.classList.toggle("panel-open", !el.controlPanel.hidden);
+}
+
+function closeMobileMenu() {
+  el.navLinks.classList.remove("open");
+  syncBodyState();
+}
+
+function toggleMobileMenu() {
+  el.navLinks.classList.toggle("open");
+  syncBodyState();
+}
+
+function openLoginModal() {
+  closeMobileMenu();
+  el.loginError.textContent = "";
+  el.loginPassword.type = "password";
+  updatePasswordToggleLabel();
+  el.loginModal.hidden = false;
+  syncBodyState();
+}
+
+function closeLoginModal() {
+  el.loginModal.hidden = true;
+  syncBodyState();
+}
+
+function toggleControlPanel() {
+  closeMobileMenu();
+  el.controlPanel.hidden = !el.controlPanel.hidden;
+  syncBodyState();
+}
+
+function closeControlPanel() {
+  el.controlPanel.hidden = true;
+  syncBodyState();
+}
+
 function escapeHtml(value) {
   return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
@@ -894,6 +941,7 @@ function clearAuthenticatedState() {
     persistSession();
   }
   if (el.controlPanel) el.controlPanel.hidden = true;
+  syncBodyState();
 }
 
 function isBackendFallbackError(error) {
@@ -1225,6 +1273,9 @@ function renderChrome() {
   el.logoutBtn.textContent = tr("logout");
   el.heroMenuBtn.textContent = tr("heroMenu");
   el.mapsLink.textContent = tr("maps");
+  if (el.heroHighlightLabels[0]) el.heroHighlightLabels[0].textContent = tr("heroBadgeHours");
+  if (el.heroHighlightLabels[1]) el.heroHighlightLabels[1].textContent = tr("heroBadgeLocation");
+  if (el.heroHighlightLabels[2]) el.heroHighlightLabels[2].textContent = tr("heroBadgeContact");
   el.aboutTag.textContent = tr("aboutTag");
   el.hoursLabel.textContent = tr("hours");
   el.addressLabel.textContent = tr("address");
@@ -1346,6 +1397,9 @@ function renderSite() {
   el.heroKicker.textContent = content.hero.kicker;
   el.heroTitle.textContent = content.hero.title;
   el.heroLead.textContent = content.hero.lead;
+  el.heroHoursBadge.textContent = content.about.hours;
+  el.heroAddressBadge.textContent = content.about.address;
+  el.heroPhoneBadge.textContent = links.phone;
   el.heroSection.style.background = `linear-gradient(to bottom, rgba(11, 10, 8, 0.3), rgba(9, 9, 9, 0.82)), url('${content.hero.image}') center/cover no-repeat`;
   el.aboutTitle.textContent = content.about.title;
   el.aboutText.textContent = content.about.text;
@@ -1865,6 +1919,7 @@ function applySessionUI() {
     el.controlPanel.hidden = true;
     el.loginModal.hidden = true;
     el.sessionInfo.textContent = tr("publicSiteMode");
+    syncBodyState();
     return;
   }
 
@@ -1889,6 +1944,7 @@ function applySessionUI() {
   el.jsonEditorBlock.hidden = !admin;
   el.addMenuItemBtn.hidden = !admin;
   el.sessionInfo.textContent = logged ? (currentLanguage === "sq" ? `I loguar si ${session.username} (${getRoleLabel(session.role)}).` : `Logged in as ${session.username} (${getRoleLabel(session.role)}).`) : tr("sessionLoggedOut");
+  syncBodyState();
 }
 
 function renderAll() {
@@ -1964,7 +2020,7 @@ async function handleLoginSubmit() {
     el.loginUsername.value = "";
     el.loginPassword.value = "";
     el.loginError.textContent = "";
-    el.loginModal.hidden = true;
+    closeLoginModal();
     renderAll();
     return;
   }
@@ -1982,7 +2038,7 @@ async function handleLoginSubmit() {
     el.loginUsername.value = "";
     el.loginPassword.value = "";
     el.loginError.textContent = "";
-    el.loginModal.hidden = true;
+    closeLoginModal();
     renderAll();
   } catch (error) {
     el.loginError.textContent = error.message || tr("invalidCredentials");
@@ -1997,10 +2053,16 @@ function bindEvents() {
       resetInactivityTimer();
     }, { passive: true });
   });
-  el.menuToggle.addEventListener("click", () => el.navLinks.classList.toggle("open"));
-  el.navLinks.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => el.navLinks.classList.remove("open")));
-  el.langSqBtn.addEventListener("click", () => setLanguage("sq"));
-  el.langEnBtn.addEventListener("click", () => setLanguage("en"));
+  el.menuToggle.addEventListener("click", toggleMobileMenu);
+  el.navLinks.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeMobileMenu));
+  el.langSqBtn.addEventListener("click", () => {
+    setLanguage("sq");
+    closeMobileMenu();
+  });
+  el.langEnBtn.addEventListener("click", () => {
+    setLanguage("en");
+    closeMobileMenu();
+  });
   el.filterButtons.forEach((button) => button.addEventListener("click", () => {
     el.filterButtons.forEach((btn) => btn.classList.remove("active"));
     button.classList.add("active");
@@ -2020,16 +2082,13 @@ function bindEvents() {
   }
   el.loginBtn.addEventListener("click", () => {
     if (!STAFF_TOOLS_ENABLED) return;
-    el.loginError.textContent = "";
-    el.loginPassword.type = "password";
-    updatePasswordToggleLabel();
-    el.loginModal.hidden = false;
+    openLoginModal();
   });
   el.toggleLoginPasswordBtn.addEventListener("click", () => {
     el.loginPassword.type = el.loginPassword.type === "password" ? "text" : "password";
     updatePasswordToggleLabel();
   });
-  el.cancelLoginBtn.addEventListener("click", () => { el.loginModal.hidden = true; });
+  el.cancelLoginBtn.addEventListener("click", closeLoginModal);
   el.submitLoginBtn.addEventListener("click", handleLoginSubmit);
   el.loginUsername.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
@@ -2042,6 +2101,23 @@ function bindEvents() {
       event.preventDefault();
       handleLoginSubmit();
     }
+  });
+  el.loginModal.addEventListener("click", (event) => {
+    if (event.target === el.loginModal) closeLoginModal();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    closeMobileMenu();
+    if (!el.loginModal.hidden) closeLoginModal();
+    if (!el.controlPanel.hidden) closeControlPanel();
+  });
+  document.addEventListener("click", (event) => {
+    if (window.innerWidth > 760) return;
+    const clickedInsideNav = event.target.closest(".nav-links, #menuToggleBtn");
+    if (!clickedInsideNav && el.navLinks.classList.contains("open")) closeMobileMenu();
+  });
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 760) closeMobileMenu();
   });
   el.orderTableInput.addEventListener("input", () => { orderDraft.table = el.orderTableInput.value; });
   el.orderCustomerInput.addEventListener("input", () => { orderDraft.customer = el.orderCustomerInput.value; });
@@ -2091,9 +2167,9 @@ function bindEvents() {
   });
   el.manageBtn.addEventListener("click", () => {
     if (!STAFF_TOOLS_ENABLED) return;
-    el.controlPanel.hidden = !el.controlPanel.hidden;
+    toggleControlPanel();
   });
-  el.panelClose.addEventListener("click", () => { el.controlPanel.hidden = true; });
+  el.panelClose.addEventListener("click", closeControlPanel);
   el.saveMenuBtn.addEventListener("click", async () => {
     if (!hasRole("admin")) return;
     try {

@@ -2077,6 +2077,7 @@ function bindEvents() {
     renderMenuGrid();
   });
   if (typeof IntersectionObserver !== "undefined") {
+    document.body.classList.add("js-animations");
     const observer = new IntersectionObserver((entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("visible")), { threshold: 0.15 });
     el.revealElements.forEach((node) => observer.observe(node));
   }

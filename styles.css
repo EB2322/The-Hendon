@@ -722,12 +722,17 @@ iframe {
 }
 
 .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+.js-animations .reveal {
   opacity: 0;
   transform: translate3d(0, 28px, 0);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.reveal.visible {
+.js-animations .reveal.visible {
   opacity: 1;
   transform: none;
 }
@@ -741,7 +746,7 @@ iframe {
     scroll-behavior: auto !important;
   }
 
-  .reveal {
+  .js-animations .reveal {
     opacity: 1;
     transform: none;
   }
